@@ -62,13 +62,14 @@ contract CoinsLeague {
 
   Game public game;
 
-  constructor(uint8 _num_players, uint256 _duration, uint256 _amount, uint8 _num_coins) {
+  constructor(uint8 _num_players, uint256 _duration, uint256 _amount, uint8 _num_coins, uint _abort_timestamp) {
     require(_num_players < 11, "Max 10 players");
     game.num_players = _num_players;
     game.duration = _duration;
     game.game_type = GameType.Winner;
     game.amount_to_play = _amount;
     game.num_coins = _num_coins;
+    game.abort_timestamp = _abort_timestamp;
   }
   /**
    * Player join game, sending native coin and choosing the price feed
@@ -81,6 +82,7 @@ contract CoinsLeague {
     Player memory new_player;
     new_player.coin_feeds = coin_feeds;
     for (uint256 index = 0; index < coin_feeds.length; index++) {
+      // We create a reference to all coins to easily retrive a feed later
       coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
     }
     new_player.player_address = msg.sender;
@@ -110,7 +112,6 @@ contract CoinsLeague {
     require(game.aborted == false, "Game was aborted"); 
     game.started = true;
     game.start_timestamp = block.timestamp;
-    console.log(game.start_timestamp);
     for (uint256 index = 0; index < players.length; index++) {
       Player storage pl = players[index];
       for (uint256 ind = 0; ind <  pl.coin_feeds.length; ind++) {
@@ -124,7 +125,7 @@ contract CoinsLeague {
    * Game has ended fetch final price
    */
   function endGame() external{
-    require( block.timestamp > game.start_timestamp + game.duration, "Game not ended");
+    require(block.timestamp >= game.start_timestamp + game.duration, "Game not ended");
     require(game.started == true, "Game needs to start first");
     require(game.finished == false, "Game needs already finished");
     game.finished = true;
@@ -157,11 +158,11 @@ contract CoinsLeague {
    * compute winners
    */
   function computeWinners() public{
-      int score1;
-      int score2;
-      uint256 score1_index;
-      uint256 score2_index;
-      uint256 score3_index;
+     int score1;
+     int score2;
+     uint256 score1_index;
+     uint256 score2_index;
+     uint256 score3_index;
      for (uint256 index = 0; index < players.length; index++) {
        int score = players[index].score;
        if(game.game_type == GameType.Winner){
@@ -248,7 +249,7 @@ contract CoinsLeague {
 /**
 * View Functions
  */
-   function amountToHouse() public view returns(uint256){
+  function amountToHouse() public view returns(uint256){
     return game.total_amount_collected.mul(10).div(100);
   }
 
