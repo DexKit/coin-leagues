@@ -5,7 +5,8 @@
   "repository": "https://github.com/DexKit/coins-league.git",
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
-    "test": "npx hardhat -r dotenv/config test"
+    "test": "npx hardhat  test",
+    "deploy:matic": "npx hardhat run scripts/deploy-factory.ts --network matic"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

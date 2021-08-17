@@ -1,4 +1,3 @@
-import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-gas-reporter";
@@ -11,15 +10,6 @@ import "hardhat-typechain";
 
 import * as dotenv from 'dotenv';
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
 dotenv.config();
 
 
@@ -55,7 +45,7 @@ const { ALCHEMY_API, PRIVATE_KEY } = process.env;
     matic: {
       url: "https://rpc-mumbai.maticvigil.com",
       accounts: [PRIVATE_KEY]
-    }
+    },
   },
   gasReporter: {
     enabled: true

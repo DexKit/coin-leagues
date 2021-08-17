@@ -5,15 +5,17 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
 
+import "hardhat/console.sol";
 
-contract CoinsLeague {
+
+contract CoinsLeagueCaptain {
   using SafeMath for uint256;
   using SignedSafeMath for int;
   enum GameType { Winner, Loser }
-
   struct Player { // Struct
         address[] coin_feeds;
         address player_address;
+        address captain_coin;
         int score;
   }
 
@@ -31,10 +33,10 @@ contract CoinsLeague {
         int score;
   }
 
-  uint[3] winner_prizes;
-
-  uint[2] winner_prizes_two;
-
+  uint256[3] winner_prizes = [50, 30, 20];
+  // When is only two players
+  uint256[2] winner_prizes_two = [80, 20];
+  
   mapping(address => Coin) public coins;
 
   mapping(address => Winner) public winners;
@@ -60,13 +62,9 @@ contract CoinsLeague {
   Player[] public players;
 
   Game public game;
-  
-
-
 
   constructor(uint8 _num_players, uint256 _duration, uint256 _amount, uint8 _num_coins, uint _abort_timestamp) {
     require(_num_players < 11, "Max 10 players");
-    require(_abort_timestamp > block.timestamp, "Future date is required");
     game.num_players = _num_players;
     game.duration = _duration;
     game.game_type = GameType.Winner;
@@ -74,8 +72,6 @@ contract CoinsLeague {
     game.num_coins = _num_coins;
     game.abort_timestamp = _abort_timestamp;
   }
- 
-
   /**
    * Player join game, sending native coin and choosing the price feed
    */
@@ -85,10 +81,10 @@ contract CoinsLeague {
     require(msg.value == game.amount_to_play, "You need to sent exactly the value of the pot"); 
     require(game.aborted == false, "Game was aborted"); 
     require(amounts[msg.sender] == 0, "You Already joined"); 
-    Player storage new_player;
+    Player memory new_player;
     new_player.coin_feeds = coin_feeds;
     for (uint256 index = 0; index < coin_feeds.length; index++) {
-      // We create a reference to all coins to easily retrieve a feed later
+      // We create a reference to all coins to easily retrive a feed later
       coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
     }
     new_player.player_address = msg.sender;
@@ -98,10 +94,32 @@ contract CoinsLeague {
   }
 
   /**
+   * Player join game with captain coin
+   */
+  function joinGameWithCaptainCoin(address[] memory coin_feeds, address captain_coin) external payable {
+    require(players.length < game.num_players, "Game already full");
+    require(game.num_coins >= coin_feeds.length, "Exceed supported coins");
+    require(msg.value == game.amount_to_play, "You need to sent exactly the value of the pot"); 
+    require(game.aborted == false, "Game was aborted"); 
+    require(amounts[msg.sender] == 0, "You Already joined"); 
+    Player memory new_player;
+    new_player.coin_feeds = coin_feeds;
+    for (uint256 index = 0; index < coin_feeds.length; index++) {
+      // We create a reference to all coins to easily retrive a feed later
+      coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
+    }
+    new_player.player_address = msg.sender;
+    new_player.captain_coin = captain_coin;
+    amounts[msg.sender] = msg.value;
+    game.total_amount_collected = game.total_amount_collected.add(msg.value);
+    players.push(new_player);
+  }
+
+  /**
   * Called when game is aborted because not started due to not enough players and time elapsed
   *
    */
-  function abortGame() external{
+  function abortGame()  external{
     require(game.started == false, "Game started, could not be aborted anymore");
     require(players.length != game.num_players, "There is enough players for the game, could not be aborted");
     require(game.abort_timestamp > block.timestamp, "Abort timestamp not elapsed yet");
@@ -141,30 +159,29 @@ contract CoinsLeague {
          address coin_address = pl.coin_feeds[ind];
          Coin storage coin = coins[coin_address];
          coin.end_price = getPriceFeed(coin_address);
-         coin.score = coin.score + (coin.end_price - coin.start_price)/coin.end_price;
+         coin.score = coin.score.add(coin.end_price).sub(coin.start_price).mul(100).div(coin.end_price);
       }
     }
-    _computeScores();
-    _computeWinners();
+    computeScores();
+    computeWinners();
   }
   /**
    * compute scores of all players 
    */
-  function _computeScores() private{
+  function computeScores() public{
      for (uint256 index = 0; index < players.length; index++) {
       Player storage pl = players[index];
-      pl.score = 0;
       for (uint256 ind = 0; ind <  pl.coin_feeds.length; ind++) {
          address coin_adress = pl.coin_feeds[ind];
-         Coin memory coin = coins[coin_adress];       
-         pl.score = pl.score + coin.score;
+         Coin memory coin = coins[coin_adress];
+         pl.score = pl.score.add(coin.score);
       }
     }
   }
   /**
    * compute winners
    */
-  function _computeWinners() private{
+  function computeWinners() public{
      int score1;
      int score2;
      uint256 score1_index;
@@ -197,25 +214,14 @@ contract CoinsLeague {
        }
     }
     if(players.length > 2){
-      winners[players[score1_index].player_address] = Winner({place: 0, winner_address: players[score1_index].player_address, score:  players[score1_index].score, claimed: false});
-      winners[players[score2_index].player_address] = Winner({place: 1, winner_address: players[score2_index].player_address, score:  players[score2_index].score, claimed: false});
-      winners[players[score3_index].player_address] = Winner({place: 2, winner_address: players[score3_index].player_address, score:  players[score3_index].score, claimed: false});
+      winners[players[score1_index].player_address] = Winner(0, players[score1_index].player_address, players[score1_index].score, false);
+      winners[players[score2_index].player_address] = Winner(1, players[score2_index].player_address, players[score2_index].score, false);
+      winners[players[score3_index].player_address] = Winner(2, players[score3_index].player_address, players[score3_index].score, false);
     }else{
-      winners[players[score1_index].player_address] = Winner({place: 0, winner_address: players[score1_index].player_address, score:  players[score1_index].score, claimed: false});
-      winners[players[score2_index].player_address] = Winner({place: 1, winner_address: players[score2_index].player_address, score:  players[score2_index].score, claimed: false});
+      winners[players[score1_index].player_address] = Winner(0, players[score1_index].player_address, players[score1_index].score, false);
+      winners[players[score2_index].player_address] = Winner(1, players[score2_index].player_address, players[score2_index].score, false);
     }
   }
-
-  function _winner_prizes() internal returns (uint[3] memory){
-      winner_prizes = [50, 30, 20];
-      return winner_prizes;
-  }
-
-  function _winner_prizes_two() internal returns (uint[2] memory){
-      winner_prizes_two = [80, 20];
-      return winner_prizes_two;
-  }
-
 
 
   function claim() external {
@@ -223,8 +229,9 @@ contract CoinsLeague {
     require(winners[msg.sender].winner_address == msg.sender, "You are not a winner");
     require(winners[msg.sender].claimed == false, "You already claimed");
     winners[msg.sender].claimed = true;
-    uint256 amount = game.total_amount_collected - amountToHouse(); 
-    uint256 amountSend = (amount * _winner_prizes()[winners[msg.sender].place]) / 100;
+    uint256 amount = game.total_amount_collected.sub(amountToHouse());
+    uint256 amountSend = amount.mul(winner_prizes[winners[msg.sender].place]).div(100);
+
     (bool sent, bytes memory data) = msg.sender.call{value: amountSend}("");
     require(sent, "Failed to send Ether");
   }
@@ -233,8 +240,7 @@ contract CoinsLeague {
    */
   function houseClaim() external{
     require(game.finished == true, "Game not finished");
-    address house_address = 0x5bD68B4d6f90Bcc9F3a9456791c0Db5A43df676d;
-
+    address house_address = 0x0000000000000000000000000000000000000000;
     (bool sent, bytes memory data) = house_address.call{value: amountToHouse()}("");
     require(sent, "Failed to send Ether");
   }
@@ -248,8 +254,11 @@ contract CoinsLeague {
     (bool sent, bytes memory data) = msg.sender.call{value: amount}("");
     require(sent, "Failed to send Ether");
   }
+
+  
  
-  function getPriceFeed(address coin_feed) public view returns (int){
+  
+  function getPriceFeed(address coin_feed) private view returns (int){
       (
             uint80 roundID, 
             int price,
@@ -263,7 +272,7 @@ contract CoinsLeague {
 * View Functions
  */
   function amountToHouse() public view returns(uint256){
-    return (game.total_amount_collected * 10 ) / 100;
+    return game.total_amount_collected.mul(10).div(100);
   }
 
   function totalCollected() public view returns(uint256){
@@ -273,26 +282,21 @@ contract CoinsLeague {
   function totalPlayers() public view returns(uint256){
     return players.length;
   }
-  function playerCoinFeeds(uint index) external view returns(address[] memory){
-    return players[index].coin_feeds;
-  }
 
-  function gameFinished() external view returns(bool){
+  function gameFinished() public view returns(bool){
     return game.finished;
   }
 
-  function gameStarted() external view returns(bool){
+  function gameStarted() public view returns(bool){
     return game.started;
   }
 
-  function gameAborted() external view returns(bool){
+  function gameAborted() public view returns(bool){
     return game.aborted;
   }
 
-  function gameScoredDone() external view returns(bool){
+  function gameScoredDone() public view returns(bool){
     return game.scores_done;
   }
- 
 
-  
 }

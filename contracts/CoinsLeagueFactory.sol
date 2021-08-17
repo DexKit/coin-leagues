@@ -18,12 +18,12 @@ contract CoinsLeagueFactory {
        * Create game and store reference on array
        */
       function createGame(uint8 _num_players, uint256 _duration, uint256 _amount, uint8 _num_coins, uint256 _abort_timestamp) external returns (CoinsLeague gameAddress){
-            CoinsLeague gameAddress = new CoinsLeague(_num_players, _duration, _amount, _num_coins, _abort_timestamp);
+            gameAddress = new CoinsLeague(_num_players, _duration, _amount, _num_coins, _abort_timestamp);
             coinsLeague.push(gameAddress);
             emit GameCreated(address(gameAddress), coinsLeague.length);
       }
 
-      function totalGames() view returns(uint256){
+      function totalGames() public view returns(uint256){
             return coinsLeague.length;
       }
 

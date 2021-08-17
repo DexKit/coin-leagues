@@ -1,0 +1,11 @@
+.join-game-form{
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+}
+
+.join-game-section {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+}

@@ -1,0 +1,11 @@
+.create-game-section{
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+  width: 300px;
+}
+
+.create-game-form{
+  display: flex;
+  flex-direction: column;
+}

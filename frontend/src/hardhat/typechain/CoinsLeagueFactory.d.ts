@@ -25,6 +25,7 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
   functions: {
     "coinsLeague(uint256)": FunctionFragment;
     "createGame(uint8,uint256,uint256,uint8,uint256)": FunctionFragment;
+    "totalGames()": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -41,12 +42,17 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
       BigNumberish
     ]
   ): string;
+  encodeFunctionData(
+    functionFragment: "totalGames",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "coinsLeague",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "createGame", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "totalGames", data: BytesLike): Result;
 
   events: {
     "GameCreated(address,uint256)": EventFragment;
@@ -124,6 +130,10 @@ export class CoinsLeagueFactory extends Contract {
       _abort_timestamp: BigNumberish,
       overrides?: Overrides
     ): Promise<ContractTransaction>;
+
+    totalGames(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    "totalGames()"(overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
   coinsLeague(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -151,6 +161,10 @@ export class CoinsLeagueFactory extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  totalGames(overrides?: CallOverrides): Promise<BigNumber>;
+
+  "totalGames()"(overrides?: CallOverrides): Promise<BigNumber>;
+
   callStatic: {
     coinsLeague(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -166,7 +180,7 @@ export class CoinsLeagueFactory extends Contract {
       _num_coins: BigNumberish,
       _abort_timestamp: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
 
     "createGame(uint8,uint256,uint256,uint8,uint256)"(
       _num_players: BigNumberish,
@@ -175,7 +189,11 @@ export class CoinsLeagueFactory extends Contract {
       _num_coins: BigNumberish,
       _abort_timestamp: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<string>;
+
+    totalGames(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "totalGames()"(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {
@@ -216,6 +234,10 @@ export class CoinsLeagueFactory extends Contract {
       _abort_timestamp: BigNumberish,
       overrides?: Overrides
     ): Promise<BigNumber>;
+
+    totalGames(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "totalGames()"(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -246,5 +268,9 @@ export class CoinsLeagueFactory extends Contract {
       _abort_timestamp: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
+
+    totalGames(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "totalGames()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

@@ -22,22 +22,23 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
 
-interface CoinsLeagueInterface extends ethers.utils.Interface {
+interface CoinsLeagueCaptainInterface extends ethers.utils.Interface {
   functions: {
     "abortGame()": FunctionFragment;
     "amountToHouse()": FunctionFragment;
     "claim()": FunctionFragment;
     "coins(address)": FunctionFragment;
+    "computeScores()": FunctionFragment;
+    "computeWinners()": FunctionFragment;
     "endGame()": FunctionFragment;
     "game()": FunctionFragment;
     "gameAborted()": FunctionFragment;
     "gameFinished()": FunctionFragment;
     "gameScoredDone()": FunctionFragment;
     "gameStarted()": FunctionFragment;
-    "getPriceFeed(address)": FunctionFragment;
     "houseClaim()": FunctionFragment;
     "joinGame(address[])": FunctionFragment;
-    "playerCoinFeeds(uint256)": FunctionFragment;
+    "joinGameWithCaptainCoin(address[],address)": FunctionFragment;
     "players(uint256)": FunctionFragment;
     "startGame()": FunctionFragment;
     "totalCollected()": FunctionFragment;
@@ -53,6 +54,14 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "claim", values?: undefined): string;
   encodeFunctionData(functionFragment: "coins", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "computeScores",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "computeWinners",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "endGame", values?: undefined): string;
   encodeFunctionData(functionFragment: "game", values?: undefined): string;
   encodeFunctionData(
@@ -72,17 +81,13 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getPriceFeed",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "houseClaim",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "joinGame", values: [string[]]): string;
   encodeFunctionData(
-    functionFragment: "playerCoinFeeds",
-    values: [BigNumberish]
+    functionFragment: "joinGameWithCaptainCoin",
+    values: [string[], string]
   ): string;
   encodeFunctionData(
     functionFragment: "players",
@@ -107,6 +112,14 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "coins", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "computeScores",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "computeWinners",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "endGame", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "game", data: BytesLike): Result;
   decodeFunctionResult(
@@ -125,14 +138,10 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
     functionFragment: "gameStarted",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "getPriceFeed",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "houseClaim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "joinGame", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "playerCoinFeeds",
+    functionFragment: "joinGameWithCaptainCoin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "players", data: BytesLike): Result;
@@ -151,7 +160,7 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   events: {};
 }
 
-export class CoinsLeague extends Contract {
+export class CoinsLeagueCaptain extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -190,7 +199,7 @@ export class CoinsLeague extends Contract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<T & G>>>;
 
-  interface: CoinsLeagueInterface;
+  interface: CoinsLeagueCaptainInterface;
 
   functions: {
     abortGame(overrides?: Overrides): Promise<ContractTransaction>;
@@ -228,6 +237,14 @@ export class CoinsLeague extends Contract {
         score: BigNumber;
       }
     >;
+
+    computeScores(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "computeScores()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+    computeWinners(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "computeWinners()"(overrides?: Overrides): Promise<ContractTransaction>;
 
     endGame(overrides?: Overrides): Promise<ContractTransaction>;
 
@@ -313,16 +330,6 @@ export class CoinsLeague extends Contract {
 
     "gameStarted()"(overrides?: CallOverrides): Promise<[boolean]>;
 
-    getPriceFeed(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    "getPriceFeed(address)"(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     houseClaim(overrides?: Overrides): Promise<ContractTransaction>;
 
     "houseClaim()"(overrides?: Overrides): Promise<ContractTransaction>;
@@ -337,28 +344,38 @@ export class CoinsLeague extends Contract {
       overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    playerCoinFeeds(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string[]]>;
+    joinGameWithCaptainCoin(
+      coin_feeds: string[],
+      captain_coin: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
 
-    "playerCoinFeeds(uint256)"(
-      index: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string[]]>;
+    "joinGameWithCaptainCoin(address[],address)"(
+      coin_feeds: string[],
+      captain_coin: string,
+      overrides?: PayableOverrides
+    ): Promise<ContractTransaction>;
 
     players(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber] & { player_address: string; score: BigNumber }
+      [string, string, BigNumber] & {
+        player_address: string;
+        captain_coin: string;
+        score: BigNumber;
+      }
     >;
 
     "players(uint256)"(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber] & { player_address: string; score: BigNumber }
+      [string, string, BigNumber] & {
+        player_address: string;
+        captain_coin: string;
+        score: BigNumber;
+      }
     >;
 
     startGame(overrides?: Overrides): Promise<ContractTransaction>;
@@ -437,6 +454,14 @@ export class CoinsLeague extends Contract {
       score: BigNumber;
     }
   >;
+
+  computeScores(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "computeScores()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+  computeWinners(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "computeWinners()"(overrides?: Overrides): Promise<ContractTransaction>;
 
   endGame(overrides?: Overrides): Promise<ContractTransaction>;
 
@@ -522,16 +547,6 @@ export class CoinsLeague extends Contract {
 
   "gameStarted()"(overrides?: CallOverrides): Promise<boolean>;
 
-  getPriceFeed(
-    coin_feed: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "getPriceFeed(address)"(
-    coin_feed: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   houseClaim(overrides?: Overrides): Promise<ContractTransaction>;
 
   "houseClaim()"(overrides?: Overrides): Promise<ContractTransaction>;
@@ -546,28 +561,38 @@ export class CoinsLeague extends Contract {
     overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  playerCoinFeeds(
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string[]>;
+  joinGameWithCaptainCoin(
+    coin_feeds: string[],
+    captain_coin: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
 
-  "playerCoinFeeds(uint256)"(
-    index: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string[]>;
+  "joinGameWithCaptainCoin(address[],address)"(
+    coin_feeds: string[],
+    captain_coin: string,
+    overrides?: PayableOverrides
+  ): Promise<ContractTransaction>;
 
   players(
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber] & { player_address: string; score: BigNumber }
+    [string, string, BigNumber] & {
+      player_address: string;
+      captain_coin: string;
+      score: BigNumber;
+    }
   >;
 
   "players(uint256)"(
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [string, BigNumber] & { player_address: string; score: BigNumber }
+    [string, string, BigNumber] & {
+      player_address: string;
+      captain_coin: string;
+      score: BigNumber;
+    }
   >;
 
   startGame(overrides?: Overrides): Promise<ContractTransaction>;
@@ -646,6 +671,14 @@ export class CoinsLeague extends Contract {
         score: BigNumber;
       }
     >;
+
+    computeScores(overrides?: CallOverrides): Promise<void>;
+
+    "computeScores()"(overrides?: CallOverrides): Promise<void>;
+
+    computeWinners(overrides?: CallOverrides): Promise<void>;
+
+    "computeWinners()"(overrides?: CallOverrides): Promise<void>;
 
     endGame(overrides?: CallOverrides): Promise<void>;
 
@@ -731,16 +764,6 @@ export class CoinsLeague extends Contract {
 
     "gameStarted()"(overrides?: CallOverrides): Promise<boolean>;
 
-    getPriceFeed(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getPriceFeed(address)"(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     houseClaim(overrides?: CallOverrides): Promise<void>;
 
     "houseClaim()"(overrides?: CallOverrides): Promise<void>;
@@ -752,28 +775,38 @@ export class CoinsLeague extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    playerCoinFeeds(
-      index: BigNumberish,
+    joinGameWithCaptainCoin(
+      coin_feeds: string[],
+      captain_coin: string,
       overrides?: CallOverrides
-    ): Promise<string[]>;
+    ): Promise<void>;
 
-    "playerCoinFeeds(uint256)"(
-      index: BigNumberish,
+    "joinGameWithCaptainCoin(address[],address)"(
+      coin_feeds: string[],
+      captain_coin: string,
       overrides?: CallOverrides
-    ): Promise<string[]>;
+    ): Promise<void>;
 
     players(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber] & { player_address: string; score: BigNumber }
+      [string, string, BigNumber] & {
+        player_address: string;
+        captain_coin: string;
+        score: BigNumber;
+      }
     >;
 
     "players(uint256)"(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [string, BigNumber] & { player_address: string; score: BigNumber }
+      [string, string, BigNumber] & {
+        player_address: string;
+        captain_coin: string;
+        score: BigNumber;
+      }
     >;
 
     startGame(overrides?: CallOverrides): Promise<void>;
@@ -839,6 +872,14 @@ export class CoinsLeague extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    computeScores(overrides?: Overrides): Promise<BigNumber>;
+
+    "computeScores()"(overrides?: Overrides): Promise<BigNumber>;
+
+    computeWinners(overrides?: Overrides): Promise<BigNumber>;
+
+    "computeWinners()"(overrides?: Overrides): Promise<BigNumber>;
+
     endGame(overrides?: Overrides): Promise<BigNumber>;
 
     "endGame()"(overrides?: Overrides): Promise<BigNumber>;
@@ -863,16 +904,6 @@ export class CoinsLeague extends Contract {
 
     "gameStarted()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getPriceFeed(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getPriceFeed(address)"(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     houseClaim(overrides?: Overrides): Promise<BigNumber>;
 
     "houseClaim()"(overrides?: Overrides): Promise<BigNumber>;
@@ -887,14 +918,16 @@ export class CoinsLeague extends Contract {
       overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    playerCoinFeeds(
-      index: BigNumberish,
-      overrides?: CallOverrides
+    joinGameWithCaptainCoin(
+      coin_feeds: string[],
+      captain_coin: string,
+      overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "playerCoinFeeds(uint256)"(
-      index: BigNumberish,
-      overrides?: CallOverrides
+    "joinGameWithCaptainCoin(address[],address)"(
+      coin_feeds: string[],
+      captain_coin: string,
+      overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
     players(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
@@ -951,6 +984,14 @@ export class CoinsLeague extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    computeScores(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    "computeScores()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    computeWinners(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    "computeWinners()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
     endGame(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     "endGame()"(overrides?: Overrides): Promise<PopulatedTransaction>;
@@ -977,16 +1018,6 @@ export class CoinsLeague extends Contract {
 
     "gameStarted()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getPriceFeed(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getPriceFeed(address)"(
-      coin_feed: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     houseClaim(overrides?: Overrides): Promise<PopulatedTransaction>;
 
     "houseClaim()"(overrides?: Overrides): Promise<PopulatedTransaction>;
@@ -1001,14 +1032,16 @@ export class CoinsLeague extends Contract {
       overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    playerCoinFeeds(
-      index: BigNumberish,
-      overrides?: CallOverrides
+    joinGameWithCaptainCoin(
+      coin_feeds: string[],
+      captain_coin: string,
+      overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "playerCoinFeeds(uint256)"(
-      index: BigNumberish,
-      overrides?: CallOverrides
+    "joinGameWithCaptainCoin(address[],address)"(
+      coin_feeds: string[],
+      captain_coin: string,
+      overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
     players(

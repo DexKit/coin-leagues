@@ -1,27 +1,27 @@
-import { ethers, network } from "hardhat";
-import { Signer, BigNumber } from "ethers";
+import { ethers} from "hardhat";
+import {  BigNumber, Contract } from "ethers";
 import chai, { expect } from "chai";
 import { solidity } from "ethereum-waffle";
-import { allCoins } from "./constants";
+import { allCoins } from "../test/constants";
+
 
 
 chai.use(solidity);
 
+let coinsLeague: Contract;
+const num_players = "10";
+const duration = `${5*60}`;
+// 0.1 ETH
+const amount = BigNumber.from('10').pow('17');
+const totalAmount =  BigNumber.from(num_players).mul(amount);
+const num_coins = `${allCoins.length}`;   
 
-describe("CoinsLeague", function () {
+describe("CoinsLeague", async function () {
+ 
     before(async ()=> {
-        const CoinsLeague = await ethers.getContractFactory("CoinsLeague");
-        const num_players = "10";
-        const duration = `${5*60}`;
-        // 0.1 ETH
-        const amount = BigNumber.from('10').pow('17');
-        const totalAmount =  BigNumber.from(num_players).mul(amount);
-        const num_coins = `${allCoins.length}`;
-       
-        const coinsLeague = await CoinsLeague.deploy(num_players, duration, amount, num_coins);
+        const CoinsLeague = await ethers.getContractFactory("CoinsLeague");   
+        coinsLeague = await CoinsLeague.deploy(num_players, duration, amount, num_coins);
         await coinsLeague.deployed();
-
-
     })
 
 
