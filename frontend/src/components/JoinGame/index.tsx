@@ -44,7 +44,7 @@ export const JoinGame = (props: Props) => {
         ev.preventDefault();
         if(coin1 && coin2 && coin3 && coin4 && coin5 && coin6 && address){
             console.log(coin1)
-            coinsLeage.instance?.attach(address).joinGame([coin1, coin2, coin3], {value: ethers.utils.parseEther('0.1')}).then(()=> {
+            coinsLeage.instance?.attach(address).joinGame([coin1, coin2], {value: ethers.utils.parseEther('0.1')}).then(()=> {
                 alert('joined game');
             })
         }

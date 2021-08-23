@@ -180,7 +180,7 @@ export const Symfoni: React.FC<SymfoniProps> = ({
     }, [initializeCounter])
 
     const getCoinsLeagueFactory = (_provider: providers.Provider, _signer?: Signer) => {
-        let instance = _signer ? CoinsLeagueFactory__factory.connect('0x9b912c3c568EDD07068E5dd5Ad39468809D81bb5', _signer) : CoinsLeagueFactory__factory.connect('0x9b912c3c568EDD07068E5dd5Ad39468809D81bb5', _provider)
+        let instance = _signer ? CoinsLeagueFactory__factory.connect('0xa1B3a09D5f83a52085fd37becb229038bCeacFf3', _signer) : CoinsLeagueFactory__factory.connect('0x9b912c3c568EDD07068E5dd5Ad39468809D81bb5', _provider)
         const contract: SymfoniCoinsLeagueFactory = {
             instance: instance,
             factory: _signer ? new CoinsLeagueFactory__factory(_signer) : undefined,

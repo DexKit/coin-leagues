@@ -2,5 +2,5 @@
 pragma solidity ^0.8.0;
 
 interface IChainLinkFeedsMapETHMainnet {
-   function isChainLinkFeed(address) public view returns(bool);
+    function isChainLinkFeed(address) external view returns (bool);
 }

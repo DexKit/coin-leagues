@@ -34,6 +34,7 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
     "gameFinished()": FunctionFragment;
     "gameScoredDone()": FunctionFragment;
     "gameStarted()": FunctionFragment;
+    "getPlayers()": FunctionFragment;
     "getPriceFeed(address)": FunctionFragment;
     "houseClaim()": FunctionFragment;
     "joinGame(address[])": FunctionFragment;
@@ -69,6 +70,10 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "gameStarted",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPlayers",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -125,6 +130,7 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
     functionFragment: "gameStarted",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getPlayers", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getPriceFeed",
     data: BytesLike
@@ -148,7 +154,19 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "winners", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
-  events: {};
+  events: {
+    "AbortedGame(uint256)": EventFragment;
+    "Claimed(address)": EventFragment;
+    "EndedGame(uint256)": EventFragment;
+    "JoinedGame(address)": EventFragment;
+    "StartedGame(uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "AbortedGame"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Claimed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "EndedGame"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "JoinedGame"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "StartedGame"): EventFragment;
 }
 
 export class CoinsLeague extends Contract {
@@ -312,6 +330,30 @@ export class CoinsLeague extends Contract {
     gameStarted(overrides?: CallOverrides): Promise<[boolean]>;
 
     "gameStarted()"(overrides?: CallOverrides): Promise<[boolean]>;
+
+    getPlayers(
+      overrides?: CallOverrides
+    ): Promise<
+      [
+        ([string[], string, BigNumber] & {
+          coin_feeds: string[];
+          player_address: string;
+          score: BigNumber;
+        })[]
+      ]
+    >;
+
+    "getPlayers()"(
+      overrides?: CallOverrides
+    ): Promise<
+      [
+        ([string[], string, BigNumber] & {
+          coin_feeds: string[];
+          player_address: string;
+          score: BigNumber;
+        })[]
+      ]
+    >;
 
     getPriceFeed(
       coin_feed: string,
@@ -522,6 +564,26 @@ export class CoinsLeague extends Contract {
 
   "gameStarted()"(overrides?: CallOverrides): Promise<boolean>;
 
+  getPlayers(
+    overrides?: CallOverrides
+  ): Promise<
+    ([string[], string, BigNumber] & {
+      coin_feeds: string[];
+      player_address: string;
+      score: BigNumber;
+    })[]
+  >;
+
+  "getPlayers()"(
+    overrides?: CallOverrides
+  ): Promise<
+    ([string[], string, BigNumber] & {
+      coin_feeds: string[];
+      player_address: string;
+      score: BigNumber;
+    })[]
+  >;
+
   getPriceFeed(
     coin_feed: string,
     overrides?: CallOverrides
@@ -731,6 +793,26 @@ export class CoinsLeague extends Contract {
 
     "gameStarted()"(overrides?: CallOverrides): Promise<boolean>;
 
+    getPlayers(
+      overrides?: CallOverrides
+    ): Promise<
+      ([string[], string, BigNumber] & {
+        coin_feeds: string[];
+        player_address: string;
+        score: BigNumber;
+      })[]
+    >;
+
+    "getPlayers()"(
+      overrides?: CallOverrides
+    ): Promise<
+      ([string[], string, BigNumber] & {
+        coin_feeds: string[];
+        player_address: string;
+        score: BigNumber;
+      })[]
+    >;
+
     getPriceFeed(
       coin_feed: string,
       overrides?: CallOverrides
@@ -817,7 +899,27 @@ export class CoinsLeague extends Contract {
     "withdraw()"(overrides?: CallOverrides): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    AbortedGame(
+      timestamp: null
+    ): TypedEventFilter<[BigNumber], { timestamp: BigNumber }>;
+
+    Claimed(
+      playerAddress: null
+    ): TypedEventFilter<[string], { playerAddress: string }>;
+
+    EndedGame(
+      timestamp: null
+    ): TypedEventFilter<[BigNumber], { timestamp: BigNumber }>;
+
+    JoinedGame(
+      playerAddress: null
+    ): TypedEventFilter<[string], { playerAddress: string }>;
+
+    StartedGame(
+      timestamp: null
+    ): TypedEventFilter<[BigNumber], { timestamp: BigNumber }>;
+  };
 
   estimateGas: {
     abortGame(overrides?: Overrides): Promise<BigNumber>;
@@ -862,6 +964,10 @@ export class CoinsLeague extends Contract {
     gameStarted(overrides?: CallOverrides): Promise<BigNumber>;
 
     "gameStarted()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getPlayers(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "getPlayers()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     getPriceFeed(
       coin_feed: string,
@@ -976,6 +1082,10 @@ export class CoinsLeague extends Contract {
     gameStarted(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "gameStarted()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getPlayers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "getPlayers()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getPriceFeed(
       coin_feed: string,

@@ -2,9 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { AggregatorV3Interface } from "./AggregatorV3Interface";
+export type { ChainLinkFeedsMap } from "./ChainLinkFeedsMap";
+export type { ChainLinkFeedsMapMumbai } from "./ChainLinkFeedsMapMumbai";
 export type { CoinsLeague } from "./CoinsLeague";
 export type { CoinsLeagueFactory } from "./CoinsLeagueFactory";
+export type { IChainLinkFeedsMapETHMainnet } from "./IChainLinkFeedsMapETHMainnet";
+export type { IChainLinkFeedsMapMumbai } from "./IChainLinkFeedsMapMumbai";
 
 export { AggregatorV3Interface__factory } from "./factories/AggregatorV3Interface__factory";
+export { ChainLinkFeedsMap__factory } from "./factories/ChainLinkFeedsMap__factory";
+export { ChainLinkFeedsMapMumbai__factory } from "./factories/ChainLinkFeedsMapMumbai__factory";
 export { CoinsLeague__factory } from "./factories/CoinsLeague__factory";
 export { CoinsLeagueFactory__factory } from "./factories/CoinsLeagueFactory__factory";
+export { IChainLinkFeedsMapETHMainnet__factory } from "./factories/IChainLinkFeedsMapETHMainnet__factory";
+export { IChainLinkFeedsMapMumbai__factory } from "./factories/IChainLinkFeedsMapMumbai__factory";

@@ -25,6 +25,7 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
   functions: {
     "coinsLeague(uint256)": FunctionFragment;
     "createGame(uint8,uint256,uint256,uint8,uint256)": FunctionFragment;
+    "getGames(uint256,uint256)": FunctionFragment;
     "totalGames()": FunctionFragment;
   };
 
@@ -43,6 +44,10 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "getGames",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "totalGames",
     values?: undefined
   ): string;
@@ -52,6 +57,7 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "createGame", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getGames", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "totalGames", data: BytesLike): Result;
 
   events: {
@@ -131,6 +137,18 @@ export class CoinsLeagueFactory extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
+    getGames(
+      start: BigNumberish,
+      end: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "getGames(uint256,uint256)"(
+      start: BigNumberish,
+      end: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     totalGames(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     "totalGames()"(overrides?: CallOverrides): Promise<[BigNumber]>;
@@ -158,6 +176,18 @@ export class CoinsLeagueFactory extends Contract {
     _amount: BigNumberish,
     _num_coins: BigNumberish,
     _abort_timestamp: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  getGames(
+    start: BigNumberish,
+    end: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "getGames(uint256,uint256)"(
+    start: BigNumberish,
+    end: BigNumberish,
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
@@ -190,6 +220,18 @@ export class CoinsLeagueFactory extends Contract {
       _abort_timestamp: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    getGames(
+      start: BigNumberish,
+      end: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    "getGames(uint256,uint256)"(
+      start: BigNumberish,
+      end: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
 
     totalGames(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -235,6 +277,18 @@ export class CoinsLeagueFactory extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    getGames(
+      start: BigNumberish,
+      end: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "getGames(uint256,uint256)"(
+      start: BigNumberish,
+      end: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     totalGames(overrides?: CallOverrides): Promise<BigNumber>;
 
     "totalGames()"(overrides?: CallOverrides): Promise<BigNumber>;
@@ -266,6 +320,18 @@ export class CoinsLeagueFactory extends Contract {
       _amount: BigNumberish,
       _num_coins: BigNumberish,
       _abort_timestamp: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    getGames(
+      start: BigNumberish,
+      end: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "getGames(uint256,uint256)"(
+      start: BigNumberish,
+      end: BigNumberish,
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 

@@ -2,5 +2,5 @@
 pragma solidity ^0.8.0;
 
 interface IChainLinkFeedsMapMumbai {
-   function isChainLinkFeed(address) public view returns(bool);
+    function isChainLinkFeed(address feed) external view returns (bool);
 }

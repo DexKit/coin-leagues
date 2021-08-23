@@ -50,16 +50,19 @@ export const GameView = (props: Props) => {
             setPlayers([]);
             let play: Player[] = []
             coinsLeage.instance.attach(address).playerCoinFeeds(0).then(console.log)
-            for (let index = 0; index < totalPlayers.toNumber(); index++) {
-                coinsLeage.instance.attach(address).players(index).then(p=> {            
-                    play.push({
-                        score: p.score,
-                        address: p.player_address,
-                    })
-                    setPlayers(play);   
-                })        
-            }
+            coinsLeage.instance.attach(address).getPlayers().then((p)=> {
+                for (let index = 0; index < p.length; index++) {                       
+                        play.push({
+                            score: p[index].score,
+                            address: p[index].player_address,
+                            coin_feeds: p[index].coin_feeds
+                        })                         
+                }
+                setPlayers(play);         
+            })
+                
         }
+
     }, [totalPlayers, game, coinsLeage.instance])
 
     return  <div className='Game-View-Container'>
@@ -72,9 +75,11 @@ export const GameView = (props: Props) => {
                 <li>Scores Done: {String(game?.scores_done)}</li>
                 <li>Coins: {game?.num_coins}</li>
                 <li>Players: {game?.num_players.toString()}</li>
-                <li>Duration: {game?.duration.toString()} Minutes</li>
+                <li>Duration: {game?.duration.toString()} Seconds</li>
                 <li>Amount Play: {game?.amount_to_play} Matic</li>
                 <li>Total Collected: {game?.total_amount_collected} Matic</li>
+                <li>Started AT: { game?.start_timestamp ? new Date(game?.start_timestamp.toNumber()*1000).toLocaleString()  : ''}</li>
+                <li>End at: { game?.start_timestamp ? new Date(game?.start_timestamp.toNumber()*1000 + game?.duration.toNumber()*1000 ).toLocaleString(): ''}</li>
             </ul>
             </div>
            {(game && totalPlayers) && <div>
@@ -84,7 +89,7 @@ export const GameView = (props: Props) => {
                {game.finished && <ClaimGame address={address}/>}
                <AbortGame address={address}/>
                    <div>
-                     {players.map((p, ind)=> <PlayerView  player={p} key={ind}  />)}
+                     {players.map((p, ind)=> <PlayerView  player={p} key={ind} address={address} />)}
                   </div>
                </div>
                
