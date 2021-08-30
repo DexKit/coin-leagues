@@ -7,8 +7,11 @@ import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
 
 import "hardhat/console.sol";
 
-
-contract CoinsLeagueCaptain {
+/**
+*
+* 
+**/
+contract CoinsLeagueCaptainNFT {
   using SafeMath for uint256;
   using SignedSafeMath for int;
   enum GameType { Winner, Loser }
