@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "hardhat/console.sol";
 
@@ -32,6 +33,16 @@ contract CoinsLeagueCaptain {
         int end_price;
         int score;
   }
+  // Insert here Bittoken address
+  // address constant BITTOKEN = ;
+  // User needs to hold minimum 10 000 BITT to be able to join Game
+  uint256 constant HOLDING_AMOUNT = 10000*(10**18);
+  event JoinedGame(address playerAddress);
+  event StartedGame(uint256 timestamp);
+  event EndedGame(uint256 timestamp);
+  event AbortedGame(uint256 timestamp);
+  event HouseClaimed();
+  event Claimed(address playerAddress, uint place);
 
   uint256[3] winner_prizes = [50, 30, 20];
   // When is only two players
@@ -76,6 +87,7 @@ contract CoinsLeagueCaptain {
    * Player join game, sending native coin and choosing the price feed
    */
   function joinGame(address[] memory coin_feeds) external payable {
+    //require(IERC20(BITTOKEN).balanceOf(msg.sender) >= HOLDING_AMOUNT, "You need 10 000 BITTOKEN to join");
     require(players.length < game.num_players, "Game already full");
     require(game.num_coins >= coin_feeds.length, "Exceed supported coins");
     require(msg.value == game.amount_to_play, "You need to sent exactly the value of the pot"); 
@@ -97,6 +109,7 @@ contract CoinsLeagueCaptain {
    * Player join game with captain coin
    */
   function joinGameWithCaptainCoin(address[] memory coin_feeds, address captain_coin) external payable {
+    //require(IERC20(BITTOKEN).balanceOf(msg.sender) >= HOLDING_AMOUNT, "You need 10 000 BITTOKEN to join");
     require(players.length < game.num_players, "Game already full");
     require(game.num_coins >= coin_feeds.length, "Exceed supported coins");
     require(msg.value == game.amount_to_play, "You need to sent exactly the value of the pot"); 
@@ -105,10 +118,12 @@ contract CoinsLeagueCaptain {
     Player memory new_player;
     new_player.coin_feeds = coin_feeds;
     for (uint256 index = 0; index < coin_feeds.length; index++) {
+      require(coin_feeds[index] != address(0), "No zero address feed");
       // We create a reference to all coins to easily retrive a feed later
       coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
     }
     new_player.player_address = msg.sender;
+    require(coins[captain_coin].coin_feed == captain_coin, "Captain Coin should be available from feed list");
     new_player.captain_coin = captain_coin;
     amounts[msg.sender] = msg.value;
     game.total_amount_collected = game.total_amount_collected.add(msg.value);
@@ -245,9 +260,12 @@ contract CoinsLeagueCaptain {
    */
   function houseClaim() external{
     require(game.finished == true, "Game not finished");
+    require(houseClaimed == false, "House Already Claimed");
+    houseClaimed = true;
     address house_address = 0x0000000000000000000000000000000000000000;
     (bool sent, bytes memory data) = house_address.call{value: amountToHouse()}("");
     require(sent, "Failed to send Ether");
+    emit HouseClaimed();
   }
 
  

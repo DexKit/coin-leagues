@@ -17,7 +17,8 @@ contract CoinsLeague {
     event StartedGame(uint256 timestamp);
     event EndedGame(uint256 timestamp);
     event AbortedGame(uint256 timestamp);
-    event Claimed(address playerAddress);
+    event HouseClaimed();
+    event Claimed(address playerAddress, uint place);
 
     struct Player {
         // Struct
@@ -67,6 +68,7 @@ contract CoinsLeague {
         uint256 amount_to_play;
         uint256 total_amount_collected;
     }
+    bool houseClaimed = false;
 
     Player[] public players;
 
@@ -300,7 +302,7 @@ contract CoinsLeague {
             _winner_prizes()[winners[msg.sender].place]) / 100;
         (bool sent, bytes memory data) = msg.sender.call{value: amountSend}("");
         require(sent, "Failed to send Ether");
-        emit Claimed(msg.sender);
+        emit Claimed(msg.sender, winners[msg.sender].place);
     }
 
     /**
@@ -308,12 +310,15 @@ contract CoinsLeague {
      */
     function houseClaim() external {
         require(game.finished == true, "Game not finished");
+        require(houseClaimed == false, "House Already Claimed");
+        houseClaimed = true;
         address house_address = 0x5bD68B4d6f90Bcc9F3a9456791c0Db5A43df676d;
 
         (bool sent, bytes memory data) = house_address.call{
             value: amountToHouse()
         }("");
         require(sent, "Failed to send Ether");
+        emit HouseClaimed();
     }
 
     function withdraw() external {

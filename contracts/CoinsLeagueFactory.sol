@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
 import "./CoinsLeague.sol";
 
 /**
@@ -48,7 +47,7 @@ contract CoinsLeagueFactory {
         require(end > start, "end must be bigger than start");
         uint256 total = end - start;
         address[] memory games = new address[](total);
-        uint256 j;
+        uint256 j = 0;
         for (uint256 index = start; index < end; index++) {
             games[j] = address(coinsLeague[index]);
             j++;
@@ -59,4 +58,17 @@ contract CoinsLeagueFactory {
     function totalGames() external view returns (uint256) {
         return coinsLeague.length;
     }
+
+    function getPriceFeed(address coin_feed) public view returns (int256) {
+        (
+            uint80 roundID,
+            int256 price,
+            uint256 startedAt,
+            uint256 timeStamp,
+            uint80 answeredInRound
+        ) = AggregatorV3Interface(coin_feed).latestRoundData();
+        return price;
+    }
+
+
 }
