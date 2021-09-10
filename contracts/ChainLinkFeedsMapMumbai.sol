@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "./interfaces/IChainLinkFeedsMapMumbai.sol";
+import "./interfaces/IChainLinkFeedsMap.sol";
 
-contract ChainLinkFeedsMapMumbai is IChainLinkFeedsMapMumbai {
+contract ChainLinkFeedsMapMumbai is IChainLinkFeedsMap {
     mapping(address => bool) private chainlink_feeds;
 
     constructor() {

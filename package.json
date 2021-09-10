@@ -6,7 +6,8 @@
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
     "test": "npx hardhat  test",
-    "deploy:matic": "npx hardhat run scripts/deploy-factory.ts --network matic"
+    "compile": "npx hardhat  compile",
+    "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

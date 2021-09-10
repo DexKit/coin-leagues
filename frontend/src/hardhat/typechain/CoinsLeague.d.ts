@@ -156,8 +156,9 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
 
   events: {
     "AbortedGame(uint256)": EventFragment;
-    "Claimed(address)": EventFragment;
+    "Claimed(address,uint256)": EventFragment;
     "EndedGame(uint256)": EventFragment;
+    "HouseClaimed()": EventFragment;
     "JoinedGame(address)": EventFragment;
     "StartedGame(uint256)": EventFragment;
   };
@@ -165,6 +166,7 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "AbortedGame"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Claimed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "EndedGame"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "HouseClaimed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "JoinedGame"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "StartedGame"): EventFragment;
 }
@@ -905,12 +907,18 @@ export class CoinsLeague extends Contract {
     ): TypedEventFilter<[BigNumber], { timestamp: BigNumber }>;
 
     Claimed(
-      playerAddress: null
-    ): TypedEventFilter<[string], { playerAddress: string }>;
+      playerAddress: null,
+      place: null
+    ): TypedEventFilter<
+      [string, BigNumber],
+      { playerAddress: string; place: BigNumber }
+    >;
 
     EndedGame(
       timestamp: null
     ): TypedEventFilter<[BigNumber], { timestamp: BigNumber }>;
+
+    HouseClaimed(): TypedEventFilter<[]>;
 
     JoinedGame(
       playerAddress: null

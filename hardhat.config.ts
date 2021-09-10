@@ -42,9 +42,15 @@ const { ALCHEMY_API, PRIVATE_KEY } = process.env;
         blockNumber: 12956195
       }
     },
-    matic: {
+    mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
+      gasPrice: 8000000000,
       accounts: [PRIVATE_KEY]
+    },
+    polygon: {
+      url: `https://rpc-mainnet.matic.network`,
+      accounts: [PRIVATE_KEY],
+      gasPrice: 8000000000, 
     },
   },
   gasReporter: {

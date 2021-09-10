@@ -212,12 +212,12 @@ contract CoinsLeague {
      * compute winners
      */
     function _computeWinners() private {
-        int256 score1;
-        int256 score2;
-        int256 score3;
-        uint256 score1_index;
-        uint256 score2_index;
-        uint256 score3_index;
+        int256 score1 = 0;
+        int256 score2 = 0;
+        int256 score3 = 0;
+        uint256 score1_index = 0;
+        uint256 score2_index = 0;
+        uint256 score3_index = 0;
         for (uint256 index = 0; index < players.length; index++) {
             int256 score = players[index].score;
             if (game.game_type == GameType.Winner) {
@@ -324,6 +324,7 @@ contract CoinsLeague {
     function withdraw() external {
         require(game.aborted == true, "Game not aborted");
         uint256 amount = amounts[msg.sender];
+        require(amounts[msg.sender] > 0, "Amount different than zero");
         amounts[msg.sender] = 0;
         (bool sent, bytes memory data) = msg.sender.call{value: amount}("");
         require(sent, "Failed to send Ether");
