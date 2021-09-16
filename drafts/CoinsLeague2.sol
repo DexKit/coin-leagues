@@ -165,6 +165,40 @@ contract CoinsLeague {
         }
         emit StartedGame(block.timestamp);
     }
+     /**
+     * get current score of a player
+     */
+    function getCurrentScoresOf(uint256 index) external returns(uint256) {   
+        Player memory pl = players[index];
+        uint256 score = 0
+        for (uint256 ind = 0; ind < pl.coin_feeds.length; ind++) {
+            address coin_address = pl.coin_feeds[ind];
+            Coin memory coin = coins[coin_address];
+            if(!gameFinished()){
+                int256 endPrice = getPriceFeed(coin_address)
+                score = score + ((endPrice - coin.start_price) / endPrice);
+            }else{
+                score = score + coin.score;
+            }
+        }
+        return score
+    }
+
+    /**
+     * get current score of a player
+     */
+    function getCurrentFeedScore(address feed) external returns(uint256) {   
+        uint256 score = 0      
+        Coin memory coin = coins[feed];
+        if(!gameFinished()){
+            int256 endPrice = getPriceFeed(coin_address);
+            score = (endPrice - coin.start_price) / endPrice);
+        }else{
+            score = score + coin.score;
+        }
+        return score;
+    }
+
 
     /**
      * Game has ended fetch final price
@@ -184,7 +218,7 @@ contract CoinsLeague {
                 Coin storage coin = coins[coin_address];
                 coin.end_price = getPriceFeed(coin_address);
                 coin.score =
-                    ((coin.end_price - coin.start_price)*1000) /
+                    (coin.end_price - coin.start_price) /
                     coin.end_price;
             }
         }
@@ -201,12 +235,14 @@ contract CoinsLeague {
             Player storage pl = players[index];
             pl.score = 0;
             for (uint256 ind = 0; ind < pl.coin_feeds.length; ind++) {
-                address coin_adress = pl.coin_feeds[ind];
-                Coin memory coin = coins[coin_adress];
+                address coin_address = pl.coin_feeds[ind];
+                Coin memory coin = coins[coin_address];
                 pl.score = pl.score + coin.score;
             }
         }
     }
+
+    
 
     /**
      * compute winners
