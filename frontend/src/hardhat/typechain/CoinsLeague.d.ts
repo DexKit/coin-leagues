@@ -30,10 +30,7 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
     "coins(address)": FunctionFragment;
     "endGame()": FunctionFragment;
     "game()": FunctionFragment;
-    "gameAborted()": FunctionFragment;
-    "gameFinished()": FunctionFragment;
-    "gameScoredDone()": FunctionFragment;
-    "gameStarted()": FunctionFragment;
+    "getCurrentScoresOf(uint256)": FunctionFragment;
     "getPlayers()": FunctionFragment;
     "getPriceFeed(address)": FunctionFragment;
     "houseClaim()": FunctionFragment;
@@ -57,20 +54,8 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "endGame", values?: undefined): string;
   encodeFunctionData(functionFragment: "game", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "gameAborted",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "gameFinished",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "gameScoredDone",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "gameStarted",
-    values?: undefined
+    functionFragment: "getCurrentScoresOf",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getPlayers",
@@ -115,19 +100,7 @@ interface CoinsLeagueInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "endGame", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "game", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "gameAborted",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "gameFinished",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "gameScoredDone",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "gameStarted",
+    functionFragment: "getCurrentScoresOf",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getPlayers", data: BytesLike): Result;
@@ -262,8 +235,8 @@ export class CoinsLeague extends Contract {
         boolean,
         boolean,
         boolean,
-        number,
-        number,
+        BigNumber,
+        BigNumber,
         BigNumber,
         BigNumber,
         BigNumber,
@@ -275,8 +248,8 @@ export class CoinsLeague extends Contract {
         scores_done: boolean;
         finished: boolean;
         aborted: boolean;
-        num_coins: number;
-        num_players: number;
+        num_coins: BigNumber;
+        num_players: BigNumber;
         duration: BigNumber;
         start_timestamp: BigNumber;
         abort_timestamp: BigNumber;
@@ -294,8 +267,8 @@ export class CoinsLeague extends Contract {
         boolean,
         boolean,
         boolean,
-        number,
-        number,
+        BigNumber,
+        BigNumber,
         BigNumber,
         BigNumber,
         BigNumber,
@@ -307,8 +280,8 @@ export class CoinsLeague extends Contract {
         scores_done: boolean;
         finished: boolean;
         aborted: boolean;
-        num_coins: number;
-        num_players: number;
+        num_coins: BigNumber;
+        num_players: BigNumber;
         duration: BigNumber;
         start_timestamp: BigNumber;
         abort_timestamp: BigNumber;
@@ -317,21 +290,15 @@ export class CoinsLeague extends Contract {
       }
     >;
 
-    gameAborted(overrides?: CallOverrides): Promise<[boolean]>;
+    getCurrentScoresOf(
+      index: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
 
-    "gameAborted()"(overrides?: CallOverrides): Promise<[boolean]>;
-
-    gameFinished(overrides?: CallOverrides): Promise<[boolean]>;
-
-    "gameFinished()"(overrides?: CallOverrides): Promise<[boolean]>;
-
-    gameScoredDone(overrides?: CallOverrides): Promise<[boolean]>;
-
-    "gameScoredDone()"(overrides?: CallOverrides): Promise<[boolean]>;
-
-    gameStarted(overrides?: CallOverrides): Promise<[boolean]>;
-
-    "gameStarted()"(overrides?: CallOverrides): Promise<[boolean]>;
+    "getCurrentScoresOf(uint256)"(
+      index: BigNumberish,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
 
     getPlayers(
       overrides?: CallOverrides
@@ -495,8 +462,8 @@ export class CoinsLeague extends Contract {
       boolean,
       boolean,
       boolean,
-      number,
-      number,
+      BigNumber,
+      BigNumber,
       BigNumber,
       BigNumber,
       BigNumber,
@@ -508,8 +475,8 @@ export class CoinsLeague extends Contract {
       scores_done: boolean;
       finished: boolean;
       aborted: boolean;
-      num_coins: number;
-      num_players: number;
+      num_coins: BigNumber;
+      num_players: BigNumber;
       duration: BigNumber;
       start_timestamp: BigNumber;
       abort_timestamp: BigNumber;
@@ -527,8 +494,8 @@ export class CoinsLeague extends Contract {
       boolean,
       boolean,
       boolean,
-      number,
-      number,
+      BigNumber,
+      BigNumber,
       BigNumber,
       BigNumber,
       BigNumber,
@@ -540,8 +507,8 @@ export class CoinsLeague extends Contract {
       scores_done: boolean;
       finished: boolean;
       aborted: boolean;
-      num_coins: number;
-      num_players: number;
+      num_coins: BigNumber;
+      num_players: BigNumber;
       duration: BigNumber;
       start_timestamp: BigNumber;
       abort_timestamp: BigNumber;
@@ -550,21 +517,15 @@ export class CoinsLeague extends Contract {
     }
   >;
 
-  gameAborted(overrides?: CallOverrides): Promise<boolean>;
+  getCurrentScoresOf(
+    index: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
-  "gameAborted()"(overrides?: CallOverrides): Promise<boolean>;
-
-  gameFinished(overrides?: CallOverrides): Promise<boolean>;
-
-  "gameFinished()"(overrides?: CallOverrides): Promise<boolean>;
-
-  gameScoredDone(overrides?: CallOverrides): Promise<boolean>;
-
-  "gameScoredDone()"(overrides?: CallOverrides): Promise<boolean>;
-
-  gameStarted(overrides?: CallOverrides): Promise<boolean>;
-
-  "gameStarted()"(overrides?: CallOverrides): Promise<boolean>;
+  "getCurrentScoresOf(uint256)"(
+    index: BigNumberish,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   getPlayers(
     overrides?: CallOverrides
@@ -724,8 +685,8 @@ export class CoinsLeague extends Contract {
         boolean,
         boolean,
         boolean,
-        number,
-        number,
+        BigNumber,
+        BigNumber,
         BigNumber,
         BigNumber,
         BigNumber,
@@ -737,8 +698,8 @@ export class CoinsLeague extends Contract {
         scores_done: boolean;
         finished: boolean;
         aborted: boolean;
-        num_coins: number;
-        num_players: number;
+        num_coins: BigNumber;
+        num_players: BigNumber;
         duration: BigNumber;
         start_timestamp: BigNumber;
         abort_timestamp: BigNumber;
@@ -756,8 +717,8 @@ export class CoinsLeague extends Contract {
         boolean,
         boolean,
         boolean,
-        number,
-        number,
+        BigNumber,
+        BigNumber,
         BigNumber,
         BigNumber,
         BigNumber,
@@ -769,8 +730,8 @@ export class CoinsLeague extends Contract {
         scores_done: boolean;
         finished: boolean;
         aborted: boolean;
-        num_coins: number;
-        num_players: number;
+        num_coins: BigNumber;
+        num_players: BigNumber;
         duration: BigNumber;
         start_timestamp: BigNumber;
         abort_timestamp: BigNumber;
@@ -779,21 +740,15 @@ export class CoinsLeague extends Contract {
       }
     >;
 
-    gameAborted(overrides?: CallOverrides): Promise<boolean>;
+    getCurrentScoresOf(
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "gameAborted()"(overrides?: CallOverrides): Promise<boolean>;
-
-    gameFinished(overrides?: CallOverrides): Promise<boolean>;
-
-    "gameFinished()"(overrides?: CallOverrides): Promise<boolean>;
-
-    gameScoredDone(overrides?: CallOverrides): Promise<boolean>;
-
-    "gameScoredDone()"(overrides?: CallOverrides): Promise<boolean>;
-
-    gameStarted(overrides?: CallOverrides): Promise<boolean>;
-
-    "gameStarted()"(overrides?: CallOverrides): Promise<boolean>;
+    "getCurrentScoresOf(uint256)"(
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getPlayers(
       overrides?: CallOverrides
@@ -957,21 +912,15 @@ export class CoinsLeague extends Contract {
 
     "game()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    gameAborted(overrides?: CallOverrides): Promise<BigNumber>;
+    getCurrentScoresOf(
+      index: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
 
-    "gameAborted()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    gameFinished(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "gameFinished()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    gameScoredDone(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "gameScoredDone()"(overrides?: CallOverrides): Promise<BigNumber>;
-
-    gameStarted(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "gameStarted()"(overrides?: CallOverrides): Promise<BigNumber>;
+    "getCurrentScoresOf(uint256)"(
+      index: BigNumberish,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
 
     getPlayers(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1073,23 +1022,15 @@ export class CoinsLeague extends Contract {
 
     "game()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    gameAborted(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "gameAborted()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    gameFinished(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "gameFinished()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    gameScoredDone(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "gameScoredDone()"(
-      overrides?: CallOverrides
+    getCurrentScoresOf(
+      index: BigNumberish,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    gameStarted(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "gameStarted()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "getCurrentScoresOf(uint256)"(
+      index: BigNumberish,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
 
     getPlayers(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

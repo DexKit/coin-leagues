@@ -4,9 +4,8 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
-import "./interfaces/ICoinsLeagueSettings.sol";
 
-contract CoinsLeague {
+contract CoinsLeague2 {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     enum GameType {
@@ -44,7 +43,9 @@ contract CoinsLeague {
         int256 score;
     }
 
-    ICoinsLeagueSettings Settings;
+    uint256[3] winner_prizes;
+
+    uint256[2] winner_prizes_two;
 
     mapping(address => Coin) public coins;
 
@@ -59,8 +60,8 @@ contract CoinsLeague {
         bool scores_done;
         bool finished;
         bool aborted;
-        uint256 num_coins;
-        uint256 num_players;
+        uint8 num_coins;
+        uint8 num_players;
         uint256 duration;
         uint256 start_timestamp;
         uint256 abort_timestamp;
@@ -74,26 +75,23 @@ contract CoinsLeague {
     Game public game;
 
     constructor(
-        uint256 _num_players,
+        uint8 _num_players,
         uint256 _duration,
         uint256 _amount,
-        uint256 _num_coins,
-        uint256 _abort_timestamp,
-        address _settingsAddress
+        uint8 _num_coins,
+        uint256 _abort_timestamp
     ) {
-        Settings = ICoinsLeagueSettings(_settingsAddress);
-        require(Settings.isAllowedAmountPlayers(_num_players), "Amount of players not supported");
-        require(Settings.isAllowedAmountCoins(_num_coins), "Amount of coins not supported");
+        require(_num_players > 1, "Min 2 players");
+        require(_num_players < 11, "Max 10 players");
+        require(_num_coins < 11, "Max 10 coins");
         require(_abort_timestamp > block.timestamp, "Future date is required");
-        require(Settings.isAllowedAmounts(_amount), "Amount not supported");
-        require(Settings.isAllowedTimeFrame(_duration), "Time Frame not supported");
+        require(_amount >= 0.01 ether, "Min 0.01 ETH to play");
         game.num_players = _num_players;
         game.duration = _duration;
         game.game_type = GameType.Winner;
         game.amount_to_play = _amount;
         game.num_coins = _num_coins;
         game.abort_timestamp = _abort_timestamp;
-     
     }
 
     /**
@@ -112,7 +110,7 @@ contract CoinsLeague {
         Player storage new_player;
         new_player.coin_feeds = coin_feeds;
         for (uint256 index = 0; index < coin_feeds.length; index++) {
-            require(Settings.isChainLinkFeed(coin_feeds[index]), 'Feed not supported');
+            require(coin_feeds[index] != address(0), "No zero address feed");
             // We create a reference to all coins to easily retrieve a feed later
             coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
         }
@@ -190,8 +188,16 @@ contract CoinsLeague {
                     coin.end_price;
             }
         }
-        // Computes scores of game
-        for(uint256 index = 0; index < players.length; index++) {
+        _computeScores();
+        _computeWinners();
+        emit EndedGame(block.timestamp);
+    }
+
+    /**
+     * compute scores of all players
+     */
+    function _computeScores() private {
+        for (uint256 index = 0; index < players.length; index++) {
             Player storage pl = players[index];
             pl.score = 0;
             for (uint256 ind = 0; ind < pl.coin_feeds.length; ind++) {
@@ -200,12 +206,8 @@ contract CoinsLeague {
                 pl.score = pl.score + coin.score;
             }
         }
-
-        _computeWinners();
-        emit EndedGame(block.timestamp);
     }
 
-  
     /**
      * compute winners
      */
@@ -276,6 +278,17 @@ contract CoinsLeague {
             });
         }
     }
+
+    function _winner_prizes() internal returns (uint256[3] memory) {
+        winner_prizes = [50, 30, 20];
+        return winner_prizes;
+    }
+
+    function _winner_prizes_two() internal returns (uint256[2] memory) {
+        winner_prizes_two = [80, 20];
+        return winner_prizes_two;
+    }
+
     function claim() external {
         require(game.finished == true, "Game not finished");
         require(
@@ -285,16 +298,9 @@ contract CoinsLeague {
         require(winners[msg.sender].claimed == false, "You already claimed");
         winners[msg.sender].claimed = true;
         uint256 amount = game.total_amount_collected - amountToHouse();
-        uint256 amountSend;
-         if (players.length > 2) {
-            amountSend = (amount *
-            Settings.getPrizesPlayers()[winners[msg.sender].place]) / 100;
-         }else{
-            amountSend = (amount *
-            Settings.getPrizesTwoPlayers()[winners[msg.sender].place]) / 100;
-         }
-
-        (bool sent, ) = msg.sender.call{value: amountSend}("");
+        uint256 amountSend = (amount *
+            _winner_prizes()[winners[msg.sender].place]) / 100;
+        (bool sent, bytes memory data) = msg.sender.call{value: amountSend}("");
         require(sent, "Failed to send Ether");
         emit Claimed(msg.sender, winners[msg.sender].place);
     }
@@ -306,9 +312,9 @@ contract CoinsLeague {
         require(game.finished == true, "Game not finished");
         require(houseClaimed == false, "House Already Claimed");
         houseClaimed = true;
-        address house_address = Settings.getHouseAddress();
+        address house_address = 0x5bD68B4d6f90Bcc9F3a9456791c0Db5A43df676d;
 
-        (bool sent, ) = house_address.call{
+        (bool sent, bytes memory data) = house_address.call{
             value: amountToHouse()
         }("");
         require(sent, "Failed to send Ether");
@@ -326,10 +332,11 @@ contract CoinsLeague {
 
     function getPriceFeed(address coin_feed) public view returns (int256) {
         (
-            ,
+            uint80 roundID,
             int256 price,
-            ,
-            ,
+            uint256 startedAt,
+            uint256 timeStamp,
+            uint80 answeredInRound
         ) = AggregatorV3Interface(coin_feed).latestRoundData();
         return price;
     }
@@ -339,6 +346,10 @@ contract CoinsLeague {
      */
     function amountToHouse() public view returns (uint256) {
         return (game.total_amount_collected * 10) / 100;
+    }
+
+    function totalCollected() public view returns (uint256) {
+        return game.total_amount_collected;
     }
 
     function totalPlayers() public view returns (uint256) {
@@ -355,5 +366,21 @@ contract CoinsLeague {
 
     function getPlayers() external view returns (Player[] memory) {
         return players;
+    }
+
+    function gameFinished() external view returns (bool) {
+        return game.finished;
+    }
+
+    function gameStarted() external view returns (bool) {
+        return game.started;
+    }
+
+    function gameAborted() external view returns (bool) {
+        return game.aborted;
+    }
+
+    function gameScoredDone() external view returns (bool) {
+        return game.scores_done;
     }
 }

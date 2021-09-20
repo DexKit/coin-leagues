@@ -27,7 +27,11 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
     "createGame(uint8,uint256,uint256,uint8,uint256)": FunctionFragment;
     "getGames(uint256,uint256)": FunctionFragment;
     "getPriceFeed(address)": FunctionFragment;
+    "owner()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "setSettings(address)": FunctionFragment;
     "totalGames()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -52,9 +56,19 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
     functionFragment: "getPriceFeed",
     values: [string]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "setSettings", values: [string]): string;
   encodeFunctionData(
     functionFragment: "totalGames",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
   ): string;
 
   decodeFunctionResult(
@@ -67,13 +81,30 @@ interface CoinsLeagueFactoryInterface extends ethers.utils.Interface {
     functionFragment: "getPriceFeed",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setSettings",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "totalGames", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
 
   events: {
     "GameCreated(address,uint256)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
+    "SettingsChanged(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "GameCreated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SettingsChanged"): EventFragment;
 }
 
 export class CoinsLeagueFactory extends Contract {
@@ -168,9 +199,37 @@ export class CoinsLeagueFactory extends Contract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
+    "owner()"(overrides?: CallOverrides): Promise<[string]>;
+
+    renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
+
+    "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+    setSettings(
+      newSettings: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "setSettings(address)"(
+      newSettings: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     totalGames(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     "totalGames()"(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "transferOwnership(address)"(
+      newOwner: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
   };
 
   coinsLeague(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -220,9 +279,37 @@ export class CoinsLeagueFactory extends Contract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  "owner()"(overrides?: CallOverrides): Promise<string>;
+
+  renounceOwnership(overrides?: Overrides): Promise<ContractTransaction>;
+
+  "renounceOwnership()"(overrides?: Overrides): Promise<ContractTransaction>;
+
+  setSettings(
+    newSettings: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "setSettings(address)"(
+    newSettings: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   totalGames(overrides?: CallOverrides): Promise<BigNumber>;
 
   "totalGames()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+  transferOwnership(
+    newOwner: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "transferOwnership(address)"(
+    newOwner: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     coinsLeague(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -272,9 +359,34 @@ export class CoinsLeagueFactory extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    "owner()"(overrides?: CallOverrides): Promise<string>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    "renounceOwnership()"(overrides?: CallOverrides): Promise<void>;
+
+    setSettings(newSettings: string, overrides?: CallOverrides): Promise<void>;
+
+    "setSettings(address)"(
+      newSettings: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     totalGames(overrides?: CallOverrides): Promise<BigNumber>;
 
     "totalGames()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "transferOwnership(address)"(
+      newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
@@ -285,6 +397,18 @@ export class CoinsLeagueFactory extends Contract {
       [string, BigNumber],
       { gameAddress: string; id: BigNumber }
     >;
+
+    OwnershipTransferred(
+      previousOwner: string | null,
+      newOwner: string | null
+    ): TypedEventFilter<
+      [string, string],
+      { previousOwner: string; newOwner: string }
+    >;
+
+    SettingsChanged(
+      settingsAddress: null
+    ): TypedEventFilter<[string], { settingsAddress: string }>;
   };
 
   estimateGas: {
@@ -338,9 +462,34 @@ export class CoinsLeagueFactory extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "owner()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    renounceOwnership(overrides?: Overrides): Promise<BigNumber>;
+
+    "renounceOwnership()"(overrides?: Overrides): Promise<BigNumber>;
+
+    setSettings(newSettings: string, overrides?: Overrides): Promise<BigNumber>;
+
+    "setSettings(address)"(
+      newSettings: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     totalGames(overrides?: CallOverrides): Promise<BigNumber>;
 
     "totalGames()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "transferOwnership(address)"(
+      newOwner: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -394,8 +543,36 @@ export class CoinsLeagueFactory extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "owner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    renounceOwnership(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    "renounceOwnership()"(overrides?: Overrides): Promise<PopulatedTransaction>;
+
+    setSettings(
+      newSettings: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "setSettings(address)"(
+      newSettings: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     totalGames(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "totalGames()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "transferOwnership(address)"(
+      newOwner: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
   };
 }

@@ -11,10 +11,14 @@ async function main() {
   // If this script is run directly using `node` you may want to call compile
   // manually to make sure everything is compiled
   // await hre.run('compile');
+  const Settings = await hre.ethers.getContractFactory("CoinsLeagueSettingsMumbai");
+  const settings = await Settings.deploy();
 
+  await settings.deployed();
+  console.log("Settings deployed to:", settings.address);
   // We get the contract to deploy
   const Factory = await hre.ethers.getContractFactory("CoinsLeagueFactory");
-  const factory = await Factory.deploy();
+  const factory = await Factory.deploy(settings.address);
 
   await factory.deployed();
 

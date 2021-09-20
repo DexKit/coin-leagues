@@ -44,7 +44,7 @@ contract CoinsLeague {
         int256 score;
     }
 
-    ICoinsLeagueSettings Settings;
+    ICoinsLeagueSettings settings;
 
     mapping(address => Coin) public coins;
 
@@ -81,19 +81,18 @@ contract CoinsLeague {
         uint256 _abort_timestamp,
         address _settingsAddress
     ) {
-        Settings = ICoinsLeagueSettings(_settingsAddress);
-        require(Settings.isAllowedAmountPlayers(_num_players), "Amount of players not supported");
-        require(Settings.isAllowedAmountCoins(_num_coins), "Amount of coins not supported");
+        require(ICoinsLeagueSettings(_settingsAddress).isAllowedAmountPlayers(_num_players), "Amount of players not supported");
+        require(ICoinsLeagueSettings(_settingsAddress).isAllowedAmountCoins(_num_coins), "Amount of coins not supported");
         require(_abort_timestamp > block.timestamp, "Future date is required");
-        require(Settings.isAllowedAmounts(_amount), "Amount not supported");
-        require(Settings.isAllowedTimeFrame(_duration), "Time Frame not supported");
+        require(ICoinsLeagueSettings(_settingsAddress).isAllowedAmounts(_amount), "Amount not supported");
+        require(ICoinsLeagueSettings(_settingsAddress).isAllowedTimeFrame(_duration), "Time Frame not supported");
         game.num_players = _num_players;
         game.duration = _duration;
         game.game_type = GameType.Winner;
         game.amount_to_play = _amount;
         game.num_coins = _num_coins;
         game.abort_timestamp = _abort_timestamp;
-     
+        settings = ICoinsLeagueSettings(_settingsAddress);
     }
 
     /**
@@ -112,7 +111,7 @@ contract CoinsLeague {
         Player storage new_player;
         new_player.coin_feeds = coin_feeds;
         for (uint256 index = 0; index < coin_feeds.length; index++) {
-            require(Settings.isChainLinkFeed(coin_feeds[index]), 'Feed not supported');
+            require(ICoinsLeagueSettings(settings).isChainLinkFeed(coin_feeds[index]), 'Feed not supported');
             // We create a reference to all coins to easily retrieve a feed later
             coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
         }
@@ -190,8 +189,16 @@ contract CoinsLeague {
                     coin.end_price;
             }
         }
-        // Computes scores of game
-        for(uint256 index = 0; index < players.length; index++) {
+        _computeScores();
+        _computeWinners();
+        emit EndedGame(block.timestamp);
+    }
+
+    /**
+     * compute scores of all players
+     */
+    function _computeScores() private {
+        for (uint256 index = 0; index < players.length; index++) {
             Player storage pl = players[index];
             pl.score = 0;
             for (uint256 ind = 0; ind < pl.coin_feeds.length; ind++) {
@@ -200,12 +207,8 @@ contract CoinsLeague {
                 pl.score = pl.score + coin.score;
             }
         }
-
-        _computeWinners();
-        emit EndedGame(block.timestamp);
     }
-
-  
+   
     /**
      * compute winners
      */
@@ -288,10 +291,10 @@ contract CoinsLeague {
         uint256 amountSend;
          if (players.length > 2) {
             amountSend = (amount *
-            Settings.getPrizesPlayers()[winners[msg.sender].place]) / 100;
+            ICoinsLeagueSettings(settings).getPrizesPlayers()[winners[msg.sender].place]) / 100;
          }else{
             amountSend = (amount *
-            Settings.getPrizesTwoPlayers()[winners[msg.sender].place]) / 100;
+            ICoinsLeagueSettings(settings).getPrizesTwoPlayers()[winners[msg.sender].place]) / 100;
          }
 
         (bool sent, ) = msg.sender.call{value: amountSend}("");
@@ -306,7 +309,7 @@ contract CoinsLeague {
         require(game.finished == true, "Game not finished");
         require(houseClaimed == false, "House Already Claimed");
         houseClaimed = true;
-        address house_address = Settings.getHouseAddress();
+        address house_address = ICoinsLeagueSettings(settings).getHouseAddress();
 
         (bool sent, ) = house_address.call{
             value: amountToHouse()
@@ -330,6 +333,7 @@ contract CoinsLeague {
             int256 price,
             ,
             ,
+            
         ) = AggregatorV3Interface(coin_feed).latestRoundData();
         return price;
     }
@@ -339,6 +343,10 @@ contract CoinsLeague {
      */
     function amountToHouse() public view returns (uint256) {
         return (game.total_amount_collected * 10) / 100;
+    }
+
+    function totalCollected() public view returns (uint256) {
+        return game.total_amount_collected;
     }
 
     function totalPlayers() public view returns (uint256) {

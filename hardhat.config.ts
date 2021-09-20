@@ -4,9 +4,9 @@ import "hardhat-gas-reporter";
 
 import "hardhat-deploy-ethers";
 import "hardhat-deploy";
-import "@symfoni/hardhat-react";
-import "hardhat-typechain";
-
+//import "@symfoni/hardhat-react";
+//import "hardhat-typechain";
+import "hardhat-contract-sizer";
 
 import * as dotenv from 'dotenv';
 
@@ -23,6 +23,11 @@ const { ALCHEMY_API, PRIVATE_KEY } = process.env;
  export default {
   react: {
     providerPriority: ["web3modal", "hardhat"],
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
   },
   solidity: {
     compilers: [
