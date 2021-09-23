@@ -25,6 +25,7 @@ const allCoins = [inchUSDFeed, aaveFeed, adaFeed, bnbFeed, bntFeed, btcFeed, cro
 
 describe("CoinsLeague", function () {
   it("Should create a new Game and finish it", async function () {
+    const Settings = await ethers.getContractFactory("CoinsLeagueSettingsETH");
     const CoinsLeague = await ethers.getContractFactory("CoinsLeague");
     const num_players = "10";
     const duration = `${5*60}`;
@@ -34,7 +35,10 @@ describe("CoinsLeague", function () {
     const num_coins = `${allCoins.length}`;
     const blockNumber = await ethers.provider.getBlockNumber();
     const abortDate = (await ethers.provider.getBlock(blockNumber)).timestamp + 10*60;
-    const coinsLeague = await CoinsLeague.deploy(num_players, duration, amount, num_coins, abortDate);
+    const settings = await Settings.deploy();
+    await settings.deployed();
+    console.log(settings.address);
+    const coinsLeague = await CoinsLeague.deploy(num_players, duration, amount, num_coins, abortDate, 0, settings.address);
     await coinsLeague.deployed();
     const [owner, ...rest] = await ethers.getSigners();
     let joinedGame =  await coinsLeague.connect(owner).joinGame(allCoins, {value: amount});
@@ -46,28 +50,32 @@ describe("CoinsLeague", function () {
       const joinedGame =  await coinsLeague.connect(element).joinGame(allCoins, {value: amount, gasLimit: 25000000});
       await joinedGame.wait();
     }
-    expect(await coinsLeague.totalCollected()).to.equal(totalAmount.toString());
+    expect((await coinsLeague.game()).total_amount_collected).to.equal(totalAmount.toString());
     expect(await coinsLeague.totalPlayers()).to.equal(num_players);
-    expect(await coinsLeague.gameStarted()).to.equal(false);
+    expect((await coinsLeague.game()).started).to.equal(false);
     const startGame =  await coinsLeague.connect(rest[0]).startGame();
     await startGame.wait();
-    expect(await coinsLeague.gameStarted()).to.equal(true);
+    expect((await coinsLeague.game()).started).to.equal(true);
     // advance several blocks
     const blocksToAdvance =  5*60
     for (let index = 0; index < blocksToAdvance; index++) {
        await network.provider.send('evm_mine');
       
     }
-    expect(await coinsLeague.gameFinished()).to.equal(false);
+    expect((await coinsLeague.game()).finished).to.equal(false);
     const endGame =  await coinsLeague.connect(rest[0]).endGame();
     await endGame.wait();
-    expect(await coinsLeague.gameFinished()).to.equal(true);
+    expect((await coinsLeague.game()).finished).to.equal(true);
     const claimWinner =  await coinsLeague.connect(owner).claim();
+    const winner = await coinsLeague.winners(owner.address);
+    console.log(winner);
     await claimWinner.wait();
     expect(coinsLeague.connect(rest[4]).claim()).to.be.revertedWith('You are not a winner');
     expect(coinsLeague.connect(owner).claim()).to.be.revertedWith('You already claimed');
-     const players = await coinsLeague.players(0)
+     const players = await coinsLeague.players(0);
+    const coin1 = await coinsLeague.coins(btcFeed)
     console.log(players);
+    console.log(coin1);
 
     /*for (let index = 0; index < allCoins.length; index++) {
       const coin = await coinsLeague.coins(allCoins[index]);

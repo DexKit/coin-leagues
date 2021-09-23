@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "./interfaces/ICoinsLeagueSettings.sol";
+import "../interfaces/ICoinsLeagueSettings.sol";
 
 // stores all settings of game
 contract CoinsLeagueSettingsMumbai is ICoinsLeagueSettings {
@@ -25,6 +25,7 @@ contract CoinsLeagueSettingsMumbai is ICoinsLeagueSettings {
         _chainlink_feeds[0x92C09849638959196E976289418e5973CC96d645] = true;
 
          // Allowed Amounts
+        _allowed_amounts[0.01 ether] = true;
         _allowed_amounts[0.1 ether] = true;
         _allowed_amounts[1 ether]   = true;
         _allowed_amounts[3 ether]   = true;
@@ -37,6 +38,7 @@ contract CoinsLeagueSettingsMumbai is ICoinsLeagueSettings {
         _allowed_amount_players[5]  = true;
         _allowed_amount_players[10] = true;
         // Allowed Amount Coins
+        _allowed_amount_coins[1]  = true;
         _allowed_amount_coins[2]  = true;
         _allowed_amount_coins[5]  = true;
         _allowed_amount_coins[10] = true;
@@ -73,12 +75,8 @@ contract CoinsLeagueSettingsMumbai is ICoinsLeagueSettings {
          return 0x5bD68B4d6f90Bcc9F3a9456791c0Db5A43df676d;
     }
 
-     function getPrizesTwoPlayers() external pure override  returns (uint256[2] memory){
-        return [uint256(80), uint256(20)];
-     }
-
      function getPrizesPlayers() external pure override  returns (uint256[3] memory){
-        return [uint256(50), uint256(30), uint256(20)];
+        return [uint256(60), uint256(30), uint256(10)];
      }
      function getBITTMultiplier() external view override  returns (uint256){
          return 1;

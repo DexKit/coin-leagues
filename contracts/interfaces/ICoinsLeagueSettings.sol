@@ -7,7 +7,6 @@ interface ICoinsLeagueSettings {
     function isAllowedAmounts(uint256) external view returns (bool);
     function isAllowedAmountCoins(uint256) external view returns (bool);
     function isAllowedTimeFrame(uint256) external view returns (bool);
-    function getPrizesTwoPlayers() external view returns (uint256[2] memory);
     function getPrizesPlayers() external view returns (uint256[3] memory);
     function getHouseAddress() external returns (address);
     function getBITTMultiplier() external returns (uint256);

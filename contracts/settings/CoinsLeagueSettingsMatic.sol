@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "./interfaces/ICoinsLeagueSettings.sol";
+import "../interfaces/ICoinsLeagueSettings.sol";
 
 // stores all settings of game
 contract CoinsLeagueSettingsMatic is ICoinsLeagueSettings {
@@ -11,8 +11,12 @@ contract CoinsLeagueSettingsMatic is ICoinsLeagueSettings {
      mapping(uint256 => bool) private _allowed_time_frames;
 
      constructor(){
-             // AAVE / USD
+         // 1INCH / USD
+        _chainlink_feeds[0x443C5116CdF663Eb387e72C688D276e702135C87] = true;
+          // AAVE / USD
         _chainlink_feeds[0x72484B12719E23115761D5DA1646945632979bB6] = true;
+           // ADA / USD
+        _chainlink_feeds[0x882554df528115a743c4537828DA8D5B58e52544] = true;
         // ALCX / USD
         _chainlink_feeds[0x5DB6e61B6159B20F068dc15A47dF2E5931b14f29] = true;
         // ALGO / USD
@@ -59,12 +63,88 @@ contract CoinsLeagueSettingsMatic is ICoinsLeagueSettings {
         _chainlink_feeds[0xDf3f72Be10d194b58B1BB56f2c4183e661cB2114] = true;
         // ETH  / USD
         _chainlink_feeds[0xF9680D99D6C9589e2a93a78A04A279e509205945] = true;
+        // FARM  / USD
+        _chainlink_feeds[0xDFb138ba3A6CCe675A6F5961323Be31eE42E40ff] = true;
+        // FXS  / USD
+        _chainlink_feeds[0x6C0fe985D3cAcbCdE428b84fc9431792694d0f51] = true;
         // HT  / USD
         _chainlink_feeds[0x6F8F9e75C0285AecE30ADFe1BCc1955f145d971A] = true;
           // ICP  / USD
         _chainlink_feeds[0x84227A76a04289473057BEF706646199D7C58c34] = true;
           // KNC  / USD
         _chainlink_feeds[0x10e5f3DFc81B3e5Ef4e648C4454D04e79E1E41E2] = true;
+          // LEO  / USD
+        _chainlink_feeds[0x1C4A8C3A28b0B3c3a0a6E7650694d9Cd5dB12DE5] = true;
+         // LINK  / USD
+        _chainlink_feeds[0xd9FFdb71EbE7496cC440152d43986Aae0AB76665] = true;
+         // LPT  / USD
+        _chainlink_feeds[0xBAaF11CeDA1d1Ca9Cf01748F8196653c9656a400] = true;
+         // LTC  / USD
+        _chainlink_feeds[0xEB99F173cf7d9a6dC4D889C2Ad7103e8383b6Efa] = true;
+        // LUNA / USD
+        _chainlink_feeds[0x1248573D9B62AC86a3ca02aBC6Abe6d403Cd1034] = true;
+          // MANA / USD
+        _chainlink_feeds[0xA1CbF3Fe43BC3501e3Fc4b573e822c70e76A7512] = true;
+          // MATIC / USD
+        _chainlink_feeds[0xAB594600376Ec9fD91F8e885dADF0CE036862dE0] = true;
+          // MFT / USD
+        _chainlink_feeds[0x6E53C1c22427258BE55aE985a65c0C87BB631F9C] = true;
+          // MIOTA / USD
+        _chainlink_feeds[0x7d620D05c317A426903596432A5ca83375dC8d2A] = true;
+          // MIOTA / USD
+        _chainlink_feeds[0xa070427bF5bA5709f70e98b94Cb2F435a242C46C] = true;
+         // NEO / USD
+        _chainlink_feeds[0x74b3587A23eE786A43C8529c2e98D3C05a8fb1fB] = true;
+          // OHM / USD
+        _chainlink_feeds[0xa8B05B6337040c0529919BDB51f6B40A684eb08C] = true;
+         // OMG / USD
+        _chainlink_feeds[0x93FfEE768F74208a7b9f2a4426f0F6BCbb1D09de] = true;
+          // PAXG / USD
+        _chainlink_feeds[0x0f6914d8e7e1214CDb3A4C6fbf729b75C69DF608] = true;
+        // QUICK / USD
+        _chainlink_feeds[0xa058689f4bCa95208bba3F265674AE95dED75B6D] = true;
+          // REP / USD
+        _chainlink_feeds[0x634b084372f88848aC8F8006DC178aA810A58E89] = true;
+          // SAND / USD
+        _chainlink_feeds[0x3D49406EDd4D52Fb7FFd25485f32E073b529C924] = true;
+          // SNX/ USD
+        _chainlink_feeds[0xbF90A5D9B6EE9019028dbFc2a9E50056d5252894] = true;
+           // SOL/ USD
+        _chainlink_feeds[0x10C8264C0935b3B9870013e057f330Ff3e9C56dC] = true;
+          // STETH/ USD
+        _chainlink_feeds[0x87eF348CADd1Ed7cc7A5F4Fefb20325216AA2cEb] = true;
+          // SUSHI/ USD
+        _chainlink_feeds[0x49B0c695039243BBfEb8EcD054EB70061fd54aa0] = true;
+          // THETA/ USD
+        _chainlink_feeds[0x38611b09F8f2D520c14eA973765C225Bf57B9Eac] = true;
+          // TRON/ USD
+        _chainlink_feeds[0x307cCF7cBD17b69A487b9C3dbe483931Cf3E1833] = true;
+          // UMA/ USD
+        _chainlink_feeds[0x33D9B1BAaDcF4b26ab6F8E83e9cb8a611B2B3956] = true;
+           // UNI/ USD
+        _chainlink_feeds[0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C] = true;
+           // VET/ USD
+        _chainlink_feeds[0xD78bc11ef3256e3CE9dC0DF0fa7be9E9afc07f95] = true;
+            // WBTC/ USD
+        _chainlink_feeds[0xDE31F8bFBD8c84b5360CFACCa3539B938dd78ae6] = true;
+            // XLM/ USD
+        _chainlink_feeds[0x692AE5510cA9070095A496dbcFBCDA99D4024Cd9] = true;
+            // XMR/ USD
+        _chainlink_feeds[0xBE6FB0AB6302B693368D0E9001fAF77ecc6571db] = true;
+            // XRP/ USD
+        _chainlink_feeds[0x785ba89291f676b5386652eB12b30cF361020694] = true;
+          // XSUSHI/ USD
+        _chainlink_feeds[0xC16Cb62CddE46f43Fd73257b957Bf527f07b51C0] = true;
+            // XTZ/ USD
+        _chainlink_feeds[0x691e26AB58ff05800E028b0876A41B720b26FC65] = true;
+           // YFI/ USD
+        _chainlink_feeds[0x9d3A43c111E7b2C6601705D9fcF7a70c95b1dc55] = true;
+           // ZEC/ USD
+        _chainlink_feeds[0xBC08c639e579a391C4228F20d0C29d0690092DF0] = true;
+         // ZRX/ USD
+        _chainlink_feeds[0x6EA4d89474d9410939d429B786208c74853A5B47] = true;
+
+
 
          // Allowed Amounts
         _allowed_amounts[0.1 ether] = true;
@@ -115,12 +195,8 @@ contract CoinsLeagueSettingsMatic is ICoinsLeagueSettings {
          return 0x5bD68B4d6f90Bcc9F3a9456791c0Db5A43df676d;
     }
 
-      function getPrizesTwoPlayers() external view override  returns (uint256[2] memory prizes){
-        return [uint256(80), uint256(20)];
-     }
-
      function getPrizesPlayers() external view override  returns (uint256[3] memory){
-        return [uint256(50), uint256(30), uint256(20)];
+        return [uint256(60), uint256(30), uint256(10)];
      }
      
      function getBITTMultiplier() external view override  returns (uint256){

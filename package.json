@@ -7,7 +7,8 @@
   "scripts": {
     "test": "npx hardhat  test",
     "compile": "npx hardhat  compile",
-    "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai"
+    "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
+    "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -36,6 +37,6 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.2.1",
-    "@openzeppelin/contracts": "^4.2.0"
+    "@openzeppelin/contracts": "^4.3.2"
   }
 }

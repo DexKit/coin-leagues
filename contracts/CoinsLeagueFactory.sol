@@ -28,7 +28,8 @@ contract CoinsLeagueFactory is Ownable {
         uint256 _duration,
         uint256 _amount,
         uint8 _num_coins,
-        uint256 _abort_timestamp
+        uint256 _abort_timestamp,
+        CoinsLeague.GameType _game_type
     ) external returns (CoinsLeague gameAddress) {
         gameAddress = new CoinsLeague(
             _num_players,
@@ -36,6 +37,7 @@ contract CoinsLeagueFactory is Ownable {
             _amount,
             _num_coins,
             _abort_timestamp,
+            _game_type,
             _settings
         );
         coinsLeague.push(gameAddress);

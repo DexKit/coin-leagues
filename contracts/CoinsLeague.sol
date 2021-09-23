@@ -44,8 +44,6 @@ contract CoinsLeague {
         int256 score;
     }
 
-    ICoinsLeagueSettings Settings;
-
     mapping(address => Coin) public coins;
 
     mapping(address => Winner) public winners;
@@ -66,6 +64,7 @@ contract CoinsLeague {
         uint256 abort_timestamp;
         uint256 amount_to_play;
         uint256 total_amount_collected;
+        address settings;
     }
     bool houseClaimed = false;
 
@@ -79,21 +78,24 @@ contract CoinsLeague {
         uint256 _amount,
         uint256 _num_coins,
         uint256 _abort_timestamp,
-        address _settingsAddress
+        GameType _game_type,
+        address  _settingsAddress
     ) {
-        Settings = ICoinsLeagueSettings(_settingsAddress);
-        require(Settings.isAllowedAmountPlayers(_num_players), "Amount of players not supported");
-        require(Settings.isAllowedAmountCoins(_num_coins), "Amount of coins not supported");
+        game.settings = _settingsAddress;
+        require(ICoinsLeagueSettings(game.settings).isAllowedAmountPlayers(_num_players), "Amount of players not supported");
+        require(ICoinsLeagueSettings(game.settings).isAllowedAmountCoins(_num_coins), "Amount of coins not supported");
         require(_abort_timestamp > block.timestamp, "Future date is required");
-        require(Settings.isAllowedAmounts(_amount), "Amount not supported");
-        require(Settings.isAllowedTimeFrame(_duration), "Time Frame not supported");
+        require(ICoinsLeagueSettings(game.settings).isAllowedAmounts(_amount), "Amount not supported");
+        require(ICoinsLeagueSettings(game.settings).isAllowedTimeFrame(_duration), "Time Frame not supported");
+        require( _game_type == GameType.Winner || _game_type == GameType.Loser, "Game type not supported");
+       
         game.num_players = _num_players;
         game.duration = _duration;
-        game.game_type = GameType.Winner;
+        game.game_type = _game_type;
         game.amount_to_play = _amount;
         game.num_coins = _num_coins;
         game.abort_timestamp = _abort_timestamp;
-     
+      
     }
 
     /**
@@ -112,7 +114,7 @@ contract CoinsLeague {
         Player storage new_player;
         new_player.coin_feeds = coin_feeds;
         for (uint256 index = 0; index < coin_feeds.length; index++) {
-            require(Settings.isChainLinkFeed(coin_feeds[index]), 'Feed not supported');
+            require(ICoinsLeagueSettings(game.settings).isChainLinkFeed(coin_feeds[index]), "Feed not supported");
             // We create a reference to all coins to easily retrieve a feed later
             coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
         }
@@ -210,9 +212,18 @@ contract CoinsLeague {
      * compute winners
      */
     function _computeWinners() private {
-        int256 score1 = 0;
-        int256 score2 = 0;
-        int256 score3 = 0;
+        int256 score1;
+        int256 score2;
+        int256 score3;
+        if (game.game_type == GameType.Winner) {
+            score1 = -10000000;
+            score2 = -10000000;
+            score3 = -10000000;
+        }else{
+            score1 = 10000000;
+            score2 = 10000000;
+            score3 = 10000000;
+        }
         uint256 score1_index = 0;
         uint256 score2_index = 0;
         uint256 score3_index = 0;
@@ -265,13 +276,7 @@ contract CoinsLeague {
             winners[players[score1_index].player_address] = Winner({
                 place: 0,
                 winner_address: players[score1_index].player_address,
-                score: players[score1_index].score,
-                claimed: false
-            });
-            winners[players[score2_index].player_address] = Winner({
-                place: 1,
-                winner_address: players[score2_index].player_address,
-                score: players[score2_index].score,
+                score: score1,
                 claimed: false
             });
         }
@@ -288,10 +293,9 @@ contract CoinsLeague {
         uint256 amountSend;
          if (players.length > 2) {
             amountSend = (amount *
-            Settings.getPrizesPlayers()[winners[msg.sender].place]) / 100;
+            ICoinsLeagueSettings(game.settings).getPrizesPlayers()[winners[msg.sender].place]) / 100;
          }else{
-            amountSend = (amount *
-            Settings.getPrizesTwoPlayers()[winners[msg.sender].place]) / 100;
+            amountSend = amount;
          }
 
         (bool sent, ) = msg.sender.call{value: amountSend}("");
@@ -306,7 +310,7 @@ contract CoinsLeague {
         require(game.finished == true, "Game not finished");
         require(houseClaimed == false, "House Already Claimed");
         houseClaimed = true;
-        address house_address = Settings.getHouseAddress();
+        address house_address = ICoinsLeagueSettings(game.settings).getHouseAddress();
 
         (bool sent, ) = house_address.call{
             value: amountToHouse()

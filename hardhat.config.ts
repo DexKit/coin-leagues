@@ -8,10 +8,9 @@ import "hardhat-deploy";
 //import "hardhat-typechain";
 import "hardhat-contract-sizer";
 
-import * as dotenv from 'dotenv';
+import * as dotenv from "dotenv";
 
 dotenv.config();
-
 
 const { ALCHEMY_API, PRIVATE_KEY } = process.env;
 // You need to export an object to set up your config
@@ -20,7 +19,7 @@ const { ALCHEMY_API, PRIVATE_KEY } = process.env;
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
- export default {
+export default {
   react: {
     providerPriority: ["web3modal", "hardhat"],
   },
@@ -33,10 +32,21 @@ const { ALCHEMY_API, PRIVATE_KEY } = process.env;
     compilers: [
       {
         version: "0.8.0",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
       },
       {
         version: "0.6.0",
-        settings: {},
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
       },
     ],
   },
@@ -44,21 +54,24 @@ const { ALCHEMY_API, PRIVATE_KEY } = process.env;
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API}`,
-        blockNumber: 12956195
-      }
+        blockNumber: 12956195,
+      },
     },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       gasPrice: 8000000000,
-      accounts: [PRIVATE_KEY]
-    },
-    polygon: {
-      url: `https://rpc-mainnet.matic.network`,
       accounts: [PRIVATE_KEY],
-      gasPrice: 8000000000, 
+    },
+    matic: {
+      url: `https://polygon-rpc.com/`,
+      accounts: [PRIVATE_KEY],
+      gasPrice: 8000000000,
     },
   },
   gasReporter: {
-    enabled: true
-  }
+    enabled: true,
+  },
+  mocha: {
+    timeout: 2000000,
+  },
 };

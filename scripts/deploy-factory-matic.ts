@@ -14,7 +14,7 @@ async function main() {
   const [owner] = await hre.ethers.getSigners();
   console.log(owner.address);
 
-  const Settings = await hre.ethers.getContractFactory("CoinsLeagueSettingsMumbai");
+  const Settings = await hre.ethers.getContractFactory("CoinsLeagueSettingsMatic");
   const settings = await Settings.deploy();
 
   await settings.deployed();
