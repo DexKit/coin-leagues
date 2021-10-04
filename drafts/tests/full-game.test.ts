@@ -25,8 +25,8 @@ const allCoins = [inchUSDFeed, aaveFeed, adaFeed, bnbFeed, bntFeed, btcFeed, cro
 
 describe("CoinsLeague", function () {
   it("Should create a new Game and finish it", async function () {
-    const Settings = await ethers.getContractFactory("CoinsLeagueSettingsETH");
-    const CoinsLeague = await ethers.getContractFactory("CoinsLeague");
+    const Settings = await ethers.getContractFactory("CoinLeagueSettingsETH");
+    const CoinsLeague = await ethers.getContractFactory("CoinLeagues");
     const num_players = "10";
     const duration = `${5*60}`;
     // 0.1 ETH

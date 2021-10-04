@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "./CoinsLeague.sol";
+import "./CoinLeagues.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 /**
  *
@@ -9,8 +9,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  *
  *
  */
-contract CoinsLeagueFactory is Ownable {
-    CoinsLeague[] public coinsLeague;
+contract CoinLeaguesFactory is Ownable {
+    CoinLeagues[] public coinLeagues;
     address private _settings;
 
     event GameCreated(address gameAddress, uint256 id);
@@ -29,9 +29,9 @@ contract CoinsLeagueFactory is Ownable {
         uint256 _amount,
         uint8 _num_coins,
         uint256 _abort_timestamp,
-        CoinsLeague.GameType _game_type
-    ) external returns (CoinsLeague gameAddress) {
-        gameAddress = new CoinsLeague(
+        CoinLeagues.GameType _game_type
+    ) external returns (CoinLeagues gameAddress) {
+        gameAddress = new CoinLeagues(
             _num_players,
             _duration,
             _amount,
@@ -40,12 +40,12 @@ contract CoinsLeagueFactory is Ownable {
             _game_type,
             _settings
         );
-        coinsLeague.push(gameAddress);
-        emit GameCreated(address(gameAddress), coinsLeague.length);
+        coinLeagues.push(gameAddress);
+        emit GameCreated(address(gameAddress), coinLeagues.length);
     }
 
     function totalGames() external view returns (uint256) {
-        return coinsLeague.length;
+        return coinLeagues.length;
     }
 
     function setSettings(address newSettings) public onlyOwner(){
