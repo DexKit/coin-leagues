@@ -31,6 +31,10 @@ https://docs.matic.network/docs/develop/hardhat/
 # Polygon Deployed Contracts
 
 - Recent:
+Settings: 0x72512faB2712B3Cb69c415c47dA7ACE126F78674
+Factory: 0x4Bd57b86736833F73218BcF33793868dbe21E30d
+
+- Recent:
 Settings: 0xB52bA564C50EF0fA82cA37d44615FDB80015F8e3
 Factory: 0xa033640f5536331b3d3F395d81901C744E343767
 

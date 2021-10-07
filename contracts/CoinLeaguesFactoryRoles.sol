@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  *
  *
  */
-contract CoinLeaguesFactory is AccessControl {
+contract CoinLeaguesFactoryRoles is AccessControl {
     CoinLeagues[] public allGames;
     CoinLeagues[] public startedGames;
     CoinLeagues[] public createdGames;
@@ -27,6 +27,7 @@ contract CoinLeaguesFactory is AccessControl {
 
     constructor(address settings) {
         _settings = settings;
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -39,8 +40,7 @@ contract CoinLeaguesFactory is AccessControl {
         uint8 _num_coins,
         uint256 _abort_timestamp,
         CoinLeagues.GameType _game_type
-    ) external returns (CoinLeagues gameAddress) {
-        require(hasRole(CREATOR_ROLE, msg.sender));
+    ) external onlyRole(CREATOR_ROLE) returns (CoinLeagues gameAddress) {
         require(allow_create == true, "Game creation was stopped");
         uint256 index = allGames.length;
         gameAddress = new CoinLeagues(
@@ -101,13 +101,13 @@ contract CoinLeaguesFactory is AccessControl {
         return endedGames.length;
     }
 
-    function setSettings(address newSettings) public onlyOwner {
+    function setSettings(address newSettings) public onlyRole(DEFAULT_ADMIN_ROLE)  {
         require(newSettings != address(0), "Settings can not be zero address");
         _settings = newSettings;
         emit SettingsChanged(newSettings);
     }
 
-    function setAllowCreate(bool _allow_create) external onlyOwner {
+    function setAllowCreate(bool _allow_create) external onlyRole(DEFAULT_ADMIN_ROLE) {
         allow_create = _allow_create;
         emit AllowCreateChanged(_allow_create);
     }

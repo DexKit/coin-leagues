@@ -164,13 +164,15 @@ contract CoinLeagues is Ownable {
             // We create a reference to all coins to easily retrieve a feed later
             coins[coin_feeds[index]] = Coin(coin_feeds[index], 0, 0, 0);
         }
-       
+
         coins[captain_coin] = Coin(captain_coin, 0, 0, 0);
         amounts[msg.sender] = msg.value;
         game.total_amount_collected = game.total_amount_collected.add(
             msg.value
         );
-        players.push(Player(coin_feeds, msg.sender, captain_coin, champion_id, 0));
+        players.push(
+            Player(coin_feeds, msg.sender, captain_coin, champion_id, 0)
+        );
         emit JoinedGame(msg.sender);
     }
 
@@ -244,8 +246,8 @@ contract CoinLeagues is Ownable {
             Coin storage captainCoin = coins[pl.captain_coin];
             captainCoin.end_price = getPriceFeed(pl.captain_coin);
             captainCoin.score =
-                    ((captainCoin.end_price - captainCoin.start_price) * 1000) /
-                    captainCoin.end_price;
+                ((captainCoin.end_price - captainCoin.start_price) * 1000) /
+                captainCoin.end_price;
             // We compute here the captain coin with the multipliers
             // we only apply captain coin multipliers when it is an advantage for user
             if (
@@ -277,14 +279,14 @@ contract CoinLeagues is Ownable {
             } else {
                 pl.score = pl.score + captainCoin.score;
             }
-             // Computes scores of game
+            // Computes scores of game
             for (uint256 ind = 0; ind < pl.coin_feeds.length; ind++) {
                 address coin_adress = pl.coin_feeds[ind];
                 Coin memory coin = coins[coin_adress];
                 pl.score = pl.score + coin.score;
             }
         }
-       
+
         _computeWinners();
         emit EndedGame(block.timestamp);
     }
@@ -306,15 +308,29 @@ contract CoinLeagues is Ownable {
             score3 = 10000000;
         }
         uint256 score1_index = 0;
-        uint256 score2_index = 0;
-        uint256 score3_index = 0;
+        uint256 score2_index = 1;
+        uint256 score3_index = 2;
         for (uint256 index = 0; index < players.length; index++) {
             int256 score = players[index].score;
             if (game.game_type == GameType.Winner) {
                 if (score > score1) {
+                    // We need to do this to sort properly always the winners
+                    if (score1 > score2) {
+                        if (score2 > score3) {
+                            score3_index = score2_index;
+                            score3 = score2;
+                        }
+                        score2_index = score1_index;
+                        score2 = score1;
+                    }
+
                     score1_index = index;
                     score1 = score;
                 } else if (score > score2) {
+                    if (score2 > score3) {
+                        score3_index = score2_index;
+                        score3 = score2;
+                    }
                     score2_index = index;
                     score2 = score;
                 } else if (score > score3) {
@@ -323,9 +339,20 @@ contract CoinLeagues is Ownable {
                 }
             } else {
                 if (score < score1) {
-                    score1_index = index;
+                    if (score1 < score2) {
+                        if (score2 < score3) {
+                            score3_index = score2_index;
+                            score3 = score2;
+                        }
+                        score2_index = score1_index;
+                        score2 = score1;
+                    } else score1_index = index;
                     score1 = score;
                 } else if (score < score2) {
+                    if (score2 < score3) {
+                        score3_index = score2_index;
+                        score3 = score2;
+                    }
                     score2_index = index;
                     score2 = score;
                 } else if (score > score3) {
@@ -409,7 +436,7 @@ contract CoinLeagues is Ownable {
         uint256 amount = amounts[msg.sender];
         require(amounts[msg.sender] > 0, "Amount different than zero");
         amounts[msg.sender] = 0;
-        (bool sent,) = msg.sender.call{value: amount}("");
+        (bool sent, ) = msg.sender.call{value: amount}("");
         require(sent, "Failed to send Ether");
     }
 
@@ -449,7 +476,7 @@ contract CoinLeagues is Ownable {
     {
         return players[index].coin_feeds;
     }
-    
+
     function getPlayers() external view returns (Player[] memory) {
         return players;
     }

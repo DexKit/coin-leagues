@@ -9,7 +9,7 @@
    "license": "MIT",
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
-    "test": "npx hardhat  test test/factory-v2.test.ts",
+    "test": "npx hardhat  test test/computeScores.test.ts",
     "compile": "npx hardhat  compile",
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic"
