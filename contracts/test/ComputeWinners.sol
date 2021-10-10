@@ -110,7 +110,7 @@ contract ComputeWinners {
                         }
                         score2_index = score1_index;
                         score2 = score1;
-                    }else 
+                    }
                     score1_index = index;
                     score1 = score;
                 } else if (score < score2) {
@@ -120,7 +120,7 @@ contract ComputeWinners {
                     }
                     score2_index = index;
                     score2 = score;
-                } else if (score > score3) {
+                } else if (score < score3) {
                     score3 = score;
                     score3_index = index;
                 }

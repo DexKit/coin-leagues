@@ -25,9 +25,9 @@ contract CoinLeaguesFactoryRoles is AccessControl {
 
     bytes32 public constant CREATOR_ROLE = keccak256("CREATOR_ROLE");
 
-    constructor(address settings) {
+    constructor(address settings, address admin) {
         _settings = settings;
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
     /**

@@ -22,7 +22,7 @@ contract CoinLeagues is Ownable {
     event EndedGame(uint256 timestamp);
     event AbortedGame(uint256 timestamp);
     event HouseClaimed();
-    event Claimed(address playerAddress, uint256 place);
+    event Claimed(address playerAddress, uint256 place, uint256 amountSend);
     // We are using a placeholder here only
     IChampions internal immutable CHAMPIONS =
         IChampions(0x4D0Def42Cf57D6f27CD4983042a55dce1C9F853c);
@@ -340,13 +340,14 @@ contract CoinLeagues is Ownable {
             } else {
                 if (score < score1) {
                     if (score1 < score2) {
-                        if (score2 < score3) {
+                        if(score2 < score3){
                             score3_index = score2_index;
-                            score3 = score2;
+                            score3 = score2; 
                         }
                         score2_index = score1_index;
                         score2 = score1;
-                    } else score1_index = index;
+                    }
+                    score1_index = index;
                     score1 = score;
                 } else if (score < score2) {
                     if (score2 < score3) {
@@ -355,7 +356,7 @@ contract CoinLeagues is Ownable {
                     }
                     score2_index = index;
                     score2 = score;
-                } else if (score > score3) {
+                } else if (score < score3) {
                     score3 = score;
                     score3_index = index;
                 }
@@ -413,7 +414,7 @@ contract CoinLeagues is Ownable {
 
         (bool sent, ) = msg.sender.call{value: amountSend}("");
         require(sent, "Failed to send Ether");
-        emit Claimed(msg.sender, winners[msg.sender].place);
+        emit Claimed(msg.sender, winners[msg.sender].place, amountSend);
     }
 
     /**
