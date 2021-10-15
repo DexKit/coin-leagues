@@ -157,6 +157,7 @@ contract CoinLeagueSettingsMatic is ICoinLeagueSettings {
         _allowed_amounts[1 ether] = true;
         _allowed_amounts[3 ether] = true;
         _allowed_amounts[5 ether] = true;
+        _allowed_amounts[10 ether] = true;
         _allowed_amounts[25 ether] = true;
         _allowed_amounts[50 ether] = true;
         _allowed_amounts[250 ether] = true;
@@ -226,7 +227,7 @@ contract CoinLeagueSettingsMatic is ICoinLeagueSettings {
     }
 
     function getHouseAddress() external pure override returns (address) {
-        return 0x5bD68B4d6f90Bcc9F3a9456791c0Db5A43df676d;
+        return 0x3330b5cbdADB53e91968c6bc12E6A8c5D0C944dd;
     }
 
     function getEmergencyAddress() external pure override returns (address) {
@@ -247,7 +248,7 @@ contract CoinLeagueSettingsMatic is ICoinLeagueSettings {
             BITTOKEN.balanceOf(msg.sender) >= HOLDING_BITT_MULTIPLIER ||
             DEXKIT.balanceOf(msg.sender) >= HOLDING_KIT_MULTIPLIER
         ) {
-            return int256(1300);
+            return int256(1200);
         } else {
             return int256(1200);
         }

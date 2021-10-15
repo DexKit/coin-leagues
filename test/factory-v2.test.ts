@@ -1,5 +1,5 @@
-import { ethers, network } from "hardhat";
-import { Signer, BigNumber } from "ethers";
+import {  network, ethers } from "hardhat";
+import { Signer, BigNumber, utils } from "ethers";
 import chai, { expect } from "chai";
 import { solidity } from "ethereum-waffle";
 
@@ -37,10 +37,37 @@ describe("CoinLeagueFactory", function () {
     await factory.deployed();
 
   })*/
+  it("Should grant and and create game with role creator", async function () {
+    const Settings = await ethers.getContractFactory("CoinLeagueSettingsETH");
+    const CoinLeagueFactory = await ethers.getContractFactory("CoinLeaguesFactoryRoles");
+    const settings = await Settings.deploy();
+    await settings.deployed();
+    console.log(settings.address);
+    const [owner, ...rest] = await ethers.getSigners();
+    const factory = await CoinLeagueFactory.deploy(settings.address, owner.address);
+    await factory.deployed();
+  
+   let addCreator = await factory.grantRole(utils.id('CREATOR_ROLE'), rest[1].address);
+   await addCreator.wait()
+ 
+    expect((await factory.hasRole(utils.id('CREATOR_ROLE'), rest[1].address))).to.equal(true);
+    const num_players = "10";
+    const duration = `${5*60}`;
+    // 0.1 ETH
+    const amount = BigNumber.from('10').pow('17');
+    const totalAmount =  BigNumber.from(num_players).mul(amount);
+    const num_coins = `${allCoins.length}`;
+    const blockNumber = await ethers.provider.getBlockNumber();
+    const abortDate = (await ethers.provider.getBlock(blockNumber)).timestamp + 10*60;
 
+    expect(factory.connect(rest[2]).createGame(num_players, duration, amount, num_coins, abortDate, 0)).to.be.revertedWith(`AccessControl: account ${rest[2].address.toLowerCase()} is missing role ${utils.id('CREATOR_ROLE').toLowerCase()}`); 
+    expect(factory.connect(owner).createGame(num_players, duration, amount, num_coins, abortDate, 0)).to.be.revertedWith(`AccessControl: account ${owner.address.toLowerCase()} is missing role ${utils.id('CREATOR_ROLE').toLowerCase()}`); 
+    const createGame = await factory.connect(rest[1]).createGame(num_players, duration, amount, num_coins, abortDate, 0)
+    await createGame.wait()
+  })
 
   it("Should create a full Game from factory and start game and end game", async function () {
-    const Settings = await ethers.getContractFactory("CoinLeagueSettingsETH");
+   /* const Settings = await ethers.getContractFactory("CoinLeagueSettingsETH");
     const CoinLeagueFactory = await ethers.getContractFactory("CoinLeaguesFactory");
     const settings = await Settings.deploy();
     await settings.deployed();
@@ -85,7 +112,7 @@ describe("CoinLeagueFactory", function () {
     }
     const endGame =  await factory.connect(rest[0]).endGame(0);
     await endGame.wait();
-    expect((await createdGame.game()).finished).to.equal(true);
+    expect((await createdGame.game()).finished).to.equal(true);*/
   });
 
 

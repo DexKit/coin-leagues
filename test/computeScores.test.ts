@@ -25,7 +25,7 @@ describe("ComputeScores", function () {
     playerPush = await winner.connect(rest[2]).pushPlayers(['0xc929ad75B72593967DE83E7F7Cda0493458261D9'],'0xc929ad75B72593967DE83E7F7Cda0493458261D9', 0, 3);
     await playerPush.wait()
     playerPush = await winner.connect(rest[3]).pushPlayers(['0xc929ad75B72593967DE83E7F7Cda0493458261D9'],'0xc929ad75B72593967DE83E7F7Cda0493458261D9', 0, 2);
-    const setGame =  await winner.setGame(1);
+    const setGame =  await winner.setGame(0);
     await setGame.wait()
     const computeWinners = await winner.computeWinners();
     await computeWinners.wait();
@@ -36,12 +36,12 @@ describe("ComputeScores", function () {
   //  console.log(await  winner.winners(rest[0].address))
   //  console.log(await  winner.winners(rest[1].address))
 
-    expect( (await  winner.winners(rest[3].address)).place.toString()   ).to.equal('0');
-    expect( (await  winner.winners(rest[2].address)).place.toString()   ).to.equal('1');
+    expect( (await  winner.winners(owner.address)).place.toString()   ).to.equal('0');
+    expect( (await  winner.winners(rest[0].address)).place.toString()   ).to.equal('1');
     expect( (await  winner.winners(rest[1].address)).place.toString()   ).to.equal('2');
 
-    expect( (await  winner.winners(rest[3].address)).winner_address.toString()   ).to.equal(rest[3].address);
-    expect( (await  winner.winners(rest[2].address)).winner_address.toString()   ).to.equal(rest[2].address);
+    expect( (await  winner.winners(owner.address)).winner_address.toString()   ).to.equal(owner.address);
+    expect( (await  winner.winners(rest[0].address)).winner_address.toString()   ).to.equal(rest[0].address);
     expect( (await  winner.winners(rest[1].address)).winner_address.toString()   ).to.equal(rest[1].address);
    // expect( (await  winner.winners(rest[2].address)).place.toString()   ).to.equal('0');
    // expect( (await  winner.winners(rest[3].address)).place.toString()   ).to.equal('0');

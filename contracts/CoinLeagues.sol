@@ -22,6 +22,8 @@ contract CoinLeagues is Ownable {
     event EndedGame(uint256 timestamp);
     event AbortedGame(uint256 timestamp);
     event HouseClaimed();
+    event Winned(address first);
+    event WinnedMultiple(address first, address second, address third);
     event Claimed(address playerAddress, uint256 place, uint256 amountSend);
     // We are using a placeholder here only
     IChampions internal immutable CHAMPIONS =
@@ -190,7 +192,7 @@ contract CoinLeagues is Ownable {
             "There is enough players for the game, could not be aborted"
         );
         require(
-            game.abort_timestamp > block.timestamp,
+            block.timestamp > game.abort_timestamp,
             "Abort timestamp not elapsed yet"
         );
         game.aborted = true;
@@ -240,13 +242,13 @@ contract CoinLeagues is Ownable {
                 Coin storage coin = coins[coin_address];
                 coin.end_price = getPriceFeed(coin_address);
                 coin.score =
-                    ((coin.end_price - coin.start_price) * 1000) /
+                    ((coin.end_price - coin.start_price) * 100000) /
                     coin.end_price;
             }
             Coin storage captainCoin = coins[pl.captain_coin];
             captainCoin.end_price = getPriceFeed(pl.captain_coin);
             captainCoin.score =
-                ((captainCoin.end_price - captainCoin.start_price) * 1000) /
+                ((captainCoin.end_price - captainCoin.start_price) * 100000) /
                 captainCoin.end_price;
             // We compute here the captain coin with the multipliers
             // we only apply captain coin multipliers when it is an advantage for user
@@ -299,13 +301,13 @@ contract CoinLeagues is Ownable {
         int256 score2;
         int256 score3;
         if (game.game_type == GameType.Winner) {
-            score1 = -10000000;
-            score2 = -10000000;
-            score3 = -10000000;
+            score1 = -1000000000;
+            score2 = -1000000000;
+            score3 = -1000000000;
         } else {
-            score1 = 10000000;
-            score2 = 10000000;
-            score3 = 10000000;
+            score1 = 1000000000;
+            score2 = 1000000000;
+            score3 = 1000000000;
         }
         uint256 score1_index = 0;
         uint256 score2_index = 1;
@@ -381,6 +383,7 @@ contract CoinLeagues is Ownable {
                 score: players[score3_index].score,
                 claimed: false
             });
+            emit WinnedMultiple(players[score1_index].player_address, players[score2_index].player_address, players[score3_index].player_address);
         } else {
             winners[players[score1_index].player_address] = Winner({
                 place: 0,
@@ -388,33 +391,34 @@ contract CoinLeagues is Ownable {
                 score: score1,
                 claimed: false
             });
+            emit Winned(players[score1_index].player_address);
         }
     }
 
-    function claim() external {
+    function claim(address payable owner) external {
         require(game.finished == true, "Game not finished");
         require(
-            winners[msg.sender].winner_address == msg.sender,
+            winners[owner].winner_address == owner,
             "You are not a winner"
         );
-        require(winners[msg.sender].claimed == false, "You already claimed");
-        winners[msg.sender].claimed = true;
+        require(winners[owner].claimed == false, "You already claimed");
+        winners[owner].claimed = true;
         uint256 amount = game.total_amount_collected - amountToHouse();
         uint256 amountSend;
-        if (players.length > 2) {
+        if (players.length > 3) {
             amountSend =
                 (amount *
                     ICoinLeagueSettings(game.settings).getPrizesPlayers()[
-                        winners[msg.sender].place
+                        winners[owner].place
                     ]) /
                 100;
         } else {
             amountSend = amount;
         }
 
-        (bool sent, ) = msg.sender.call{value: amountSend}("");
+        (bool sent, ) = owner.call{value: amountSend}("");
         require(sent, "Failed to send Ether");
-        emit Claimed(msg.sender, winners[msg.sender].place, amountSend);
+        emit Claimed(owner, winners[owner].place, amountSend);
     }
 
     /**
