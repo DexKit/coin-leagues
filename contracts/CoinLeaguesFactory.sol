@@ -23,8 +23,9 @@ contract CoinLeaguesFactory is Ownable {
     event SettingsChanged(address settingsAddress);
     event AllowCreateChanged(bool allow);
 
-    constructor(address settings) {
+    constructor(address settings, address owner) {
         _settings = settings;
+        _setOwner(owner);
     }
 
     /**
