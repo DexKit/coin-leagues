@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./CoinLeagues.sol";
+import "./CoinLeaguesFactory.sol";
 
 // Allows creation of rooms
 contract RoomFactory is Ownable {
@@ -37,7 +37,7 @@ contract RoomFactory is Ownable {
     function setSettingsOf(address newSettings, address factory) public onlyOwner {
        require(newSettings != address(0), "Settings can not be zero address");
        require(factory != address(0), "Factory can not be zero address");
-       CoinLeaguesFactoryRoles(factory).setSettings(newSettings);
+       CoinLeaguesFactory(factory).setSettings(newSettings);
     }
 
 }

@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./CoinLeaguesFactoryRoles.sol";
 
 // Allows creation of rooms
-contract RoomFactory is Ownable {
+contract RoomFactoryRoles is Ownable {
     event RoomCreated(address indexed creator, address room);
     event SettingsChanged(address settingsAddress);
     CoinLeaguesFactoryRoles[] public factories;

@@ -15,6 +15,7 @@
     "script:whitelist": "npx hardhat run scripts/whitelist-address.ts --network matic",
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic",
+    "deploy:room:polygon": "npx hardhat run scripts/deploy-room-factory-matic.ts --network matic",
     "deploy-roles:polygon": "npx hardhat run scripts/deploy-factory-matic-roles.ts --network matic"
   },
   "devDependencies": {

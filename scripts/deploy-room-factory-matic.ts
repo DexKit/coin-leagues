@@ -29,15 +29,16 @@ async function main() {
   // Fast Room Games
   console.log("Creating the Rooms now");
   const room1 = await factory.createRoom();
+  
   console.log("room1:", room1);
   // Daily Room Games
-  const room2 = await factory.createRoom();
+ /* const room2 = await factory.createRoom();
   console.log("room2: ", room2);
   // Weekly Room Games
   const room3 = await factory.createRoom();
   console.log("room3: ", room3);
   const room4 = await factory.createRoom();
-  console.log("room4:", room4);
+  console.log("room4:", room4);*/
 
  
 }

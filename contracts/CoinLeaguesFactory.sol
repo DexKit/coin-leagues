@@ -25,7 +25,7 @@ contract CoinLeaguesFactory is Ownable {
 
     constructor(address settings, address owner) {
         _settings = settings;
-        _setOwner(owner);
+        transferOwnership(owner);
     }
 
     /**
