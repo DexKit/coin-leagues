@@ -5,6 +5,7 @@ import { solidity } from "ethereum-waffle";
 
 
 
+
 chai.use(solidity);
 
 
@@ -24,7 +25,7 @@ const repFeed = '0x8f4e77806EFEC092A279AC6A49e129e560B4210E';
 const allCoins = [inchUSDFeed, aaveFeed, adaFeed, bnbFeed, bntFeed, btcFeed, croFeed, avaxFeed, bandFeed];
 
 
-describe("CoinLeagueFactory", function () {
+describe("CoinLeagueFactoryV2", function () {
  /*- let factory;
   let settings;
   beforeEach(async function(){
@@ -68,11 +69,12 @@ describe("CoinLeagueFactory", function () {
 
  /* it("Should create a full Game from factory and start game and end game", async function () {
     const Settings = await ethers.getContractFactory("CoinLeagueSettingsETH");
-    const CoinLeagueFactory = await ethers.getContractFactory("CoinLeaguesFactory");
+    const CoinLeagueFactory = await ethers.getContractFactory("CoinLeaguesFactoryV2");
     const settings = await Settings.deploy();
     await settings.deployed();
     console.log(settings.address);
-    const factory = await CoinLeagueFactory.deploy(settings.address);
+    const [owner, ...rest] = await ethers.getSigners();
+    const factory = await CoinLeagueFactory.deploy(settings.address, owner.address);
     await factory.deployed();
     const num_players = "10";
     const duration = `${5*60}`;
@@ -82,27 +84,83 @@ describe("CoinLeagueFactory", function () {
     const num_coins = `${allCoins.length}`;
     const blockNumber = await ethers.provider.getBlockNumber();
     const abortDate = (await ethers.provider.getBlock(blockNumber)).timestamp + 10*60;
-    await factory.createGame(num_players, duration, amount, num_coins, abortDate, 0);
-    const createdGameAddress  = await factory.createdGames(0);
+    const startDate = (await ethers.provider.getBlock(blockNumber)).timestamp - 100;
+    await factory.createGame(num_players, duration, amount, num_coins, abortDate, startDate, 0);
+    const createdGameAddress  = await factory.allGames(0);
     expect(createdGameAddress).to.be.a('string');
-    const game = await ethers.getContractFactory("CoinLeagues");
+    const game = await ethers.getContractFactory("CoinLeaguesV2");
 
     const createdGame = game.attach(createdGameAddress);
-    const [owner, ...rest] = await ethers.getSigners();
+  
     allCoins.pop();
-    let joinedGame =  await  createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], 500000, {value: amount});
-    expect(createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], 500000, {value: amount})).to.be.revertedWith('You Already joined');
+    let joinedGame =  await  createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], owner.address, 500000, {value: amount});
+    expect(createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], owner.address, 500000, {value: amount})).to.be.revertedWith('You Already joined');
     await joinedGame.wait();
     // We create the other 9 players now
     for (let index = 0; index < 9; index++) {
       const element = rest[index];
-      const joinedGame =  await  createdGame.connect(element).joinGameWithCaptainCoin(allCoins, allCoins[0], 500000, {value: amount, gasLimit: 25000000});
+      const joinedGame =  await  createdGame.connect(element).joinGameWithCaptainCoin(allCoins, allCoins[0], element.address, 500000, {value: amount, gasLimit: 25000000});
       await joinedGame.wait();
     }
+    console.log('players joined the game');
     expect((await  createdGame.game()).total_amount_collected).to.equal(totalAmount.toString());
     expect(await  createdGame.totalPlayers()).to.equal(num_players);
     expect((await  createdGame.game()).started).to.equal(false);
-    const startGame =  await factory.connect(rest[0]).startGame(0);
+    const startGame =  await factory.connect(rest[0]).startGame(createdGame.address);
+    await startGame.wait();
+    expect((await createdGame.game()).started).to.equal(true);
+    expect(factory.connect(rest[0]).startGame(createdGame.address)).to.be.revertedWith('Game already started');
+    const blocksToAdvance =  5*60
+    for (let index = 0; index < blocksToAdvance; index++) {
+       await network.provider.send('evm_mine');
+      
+    }
+    const endGame =  await factory.connect(rest[0]).endGame(createdGame.address);
+    await endGame.wait();
+    expect((await createdGame.game()).finished).to.equal(true);
+  });*/
+
+  /*it("Should create 10 player game with 2 players from factory and start game and end game", async function () {
+    const Settings = await ethers.getContractFactory("CoinLeagueSettingsETH");
+    const CoinLeagueFactory = await ethers.getContractFactory("CoinLeaguesFactoryV2");
+    const settings = await Settings.deploy();
+    await settings.deployed();
+    console.log(settings.address);
+    const [owner, ...rest] = await ethers.getSigners();
+    const factory = await CoinLeagueFactory.deploy(settings.address, owner.address);
+    await factory.deployed();
+    const num_players = "10";
+    const players_playing = '2';
+    const duration = `${5*60}`;
+    // 0.1 ETH
+    const amount = BigNumber.from('10').pow('17');
+    const totalAmount =  BigNumber.from(players_playing).mul(amount);
+    const num_coins = `${allCoins.length}`;
+    const blockNumber = await ethers.provider.getBlockNumber();
+    const abortDate = (await ethers.provider.getBlock(blockNumber)).timestamp + 10*60;
+    // it starts immediately
+    const startDate = (await ethers.provider.getBlock(blockNumber)).timestamp - 1;
+    await factory.createGame(num_players, duration, amount, num_coins, abortDate, startDate, 0);
+    const createdGameAddress  = await factory.allGames(0);
+    expect(createdGameAddress).to.be.a('string');
+    const game = await ethers.getContractFactory("CoinLeaguesV2");
+
+    const createdGame = game.attach(createdGameAddress);
+   
+    allCoins.pop();
+    let joinedGame =  await  createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], owner.address, 500000, {value: amount});
+    expect(createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], owner.address, 500000, {value: amount})).to.be.revertedWith('You Already joined');
+    await joinedGame.wait();
+    // We create the other 9 players now
+    for (let index = 0; index < 1; index++) {
+      const element = rest[index];
+      const joinedGame =  await  createdGame.connect(element).joinGameWithCaptainCoin(allCoins, allCoins[0], element.address, 500000, {value: amount, gasLimit: 25000000});
+      await joinedGame.wait();
+    }
+    expect((await  createdGame.game()).total_amount_collected).to.equal(totalAmount.toString());
+    expect(await  createdGame.totalPlayers()).to.equal(players_playing);
+    expect((await  createdGame.game()).started).to.equal(false);
+    const startGame =  await factory.connect(rest[0]).startGame(createdGame.address);
     await startGame.wait();
     expect((await createdGame.game()).started).to.equal(true);
     const blocksToAdvance =  5*60
@@ -110,10 +168,68 @@ describe("CoinLeagueFactory", function () {
        await network.provider.send('evm_mine');
       
     }
-    const endGame =  await factory.connect(rest[0]).endGame(0);
+    const endGame =  await factory.connect(rest[0]).endGame(createdGame.address);
     await endGame.wait();
     expect((await createdGame.game()).finished).to.equal(true);
   });*/
+
+  it("Should create a full Game from factory, abort and anyone able to claim", async function () {
+    const Settings = await ethers.getContractFactory("CoinLeagueSettingsETH");
+    const CoinLeagueFactory = await ethers.getContractFactory("CoinLeaguesFactoryV2");
+    const settings = await Settings.deploy();
+    await settings.deployed();
+    console.log(settings.address);
+    const [owner, ...rest] = await ethers.getSigners();
+    const factory = await CoinLeagueFactory.deploy(settings.address, owner.address);
+    await factory.deployed();
+    const num_players = "10";
+    const players_playing = "9";
+    const duration = `${5*60}`;
+    // 0.1 ETH
+    const amount = BigNumber.from('10').pow('17');
+    const totalAmount =  BigNumber.from(players_playing).mul(amount);
+    const num_coins = `${allCoins.length}`;
+    const blockNumber = await ethers.provider.getBlockNumber();
+    const abortDate = (await ethers.provider.getBlock(blockNumber)).timestamp + 60;
+    const startDate = (await ethers.provider.getBlock(blockNumber)).timestamp - 1;
+    await factory.createGame(num_players, duration, amount, num_coins, abortDate, startDate, 0);
+    const createdGameAddress  = await factory.allGames(0);
+    expect(createdGameAddress).to.be.a('string');
+    const game = await ethers.getContractFactory("CoinLeaguesV2");
+
+    const createdGame = game.attach(createdGameAddress);
+  
+    allCoins.pop();
+    let joinedGame =  await  createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], owner.address, 500000, {value: amount});
+    expect(createdGame.connect(owner).joinGameWithCaptainCoin(allCoins, allCoins[0], owner.address, 500000, {value: amount})).to.be.revertedWith('You Already joined');
+    await joinedGame.wait();
+    // We create the other 8 players now
+    for (let index = 0; index < 8; index++) {
+      const element = rest[index];
+      const joinedGame =  await  createdGame.connect(element).joinGameWithCaptainCoin(allCoins, allCoins[0], element.address, 500000, {value: amount, gasLimit: 25000000});
+      await joinedGame.wait();
+    }
+    expect((await  createdGame.game()).total_amount_collected).to.equal(totalAmount.toString());
+    expect(await  createdGame.totalPlayers()).to.equal(players_playing);
+    expect((await  createdGame.game()).started).to.equal(false);
+    const blocksToAdvance =  5*60
+    for (let index = 0; index < blocksToAdvance; index++) {
+      await network.provider.send('evm_mine');
+     
+   }
+
+    const abortGame =  await factory.connect(rest[0]).abortGame(createdGame.address);
+    await abortGame.wait();
+    expect((await createdGame.game()).aborted).to.equal(true);
+    const balance = await ethers.provider.getBalance(rest[1].address) as BigNumber;
+
+    const withdrawGame =  await  createdGame.connect(owner).withdraw(rest[1].address);
+    await withdrawGame.wait();
+    const atualBalance = await ethers.provider.getBalance(rest[1].address);
+    expect(atualBalance.toString()).to.be.equal(balance.add(amount).toString());
+    
+
+  })
 
  /* it("Should create a full Game from factory and start game and end game with 25 players", async function () {
      const [owner, ...rest] = await ethers.getSigners();

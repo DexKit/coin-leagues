@@ -10,11 +10,12 @@
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
     "test": "npx hardhat  test test/computeScores.test.ts",
-    "test:factory": "npx hardhat  test test/factory-v2.test.ts",
+    "test:factory": "npx hardhat  test test/factory-v3.test.ts",
     "compile": "npx hardhat  compile",
     "script:whitelist": "npx hardhat run scripts/whitelist-address.ts --network matic",
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic",
+    "deploy:v2:polygon": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network matic",
     "deploy:room:polygon": "npx hardhat run scripts/deploy-room-factory-matic.ts --network matic",
     "deploy-roles:polygon": "npx hardhat run scripts/deploy-factory-matic-roles.ts --network matic"
   },

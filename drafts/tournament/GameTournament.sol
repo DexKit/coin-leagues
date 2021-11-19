@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
-import "./interfaces/ICoinLeagueSettings.sol";
-import "./interfaces/IChampions.sol";
+import "../interfaces/ICoinLeagueSettings.sol";
+import "../interfaces/IChampions.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CoinLeagues is Ownable {
+contract GameTournament is Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     enum GameType {
@@ -16,6 +16,7 @@ contract CoinLeagues is Ownable {
         Loser
     }
     uint256 public id;
+    uint256 public round;
 
     event JoinedGame(address playerAddress);
     event StartedGame(uint256 timestamp);
@@ -26,8 +27,6 @@ contract CoinLeagues is Ownable {
     event WinnedMultiple(address first, address second, address third);
     event Claimed(address playerAddress, uint256 place, uint256 amountSend);
 
-    IChampions internal immutable CHAMPIONS =
-        IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
     struct Player {
         // Struct
         address[] coin_feeds;
@@ -35,6 +34,8 @@ contract CoinLeagues is Ownable {
         address captain_coin;
         uint256 champion_id;
         int256 score;
+        address affiliate;
+
     }
 
     struct Winner {
@@ -57,6 +58,11 @@ contract CoinLeagues is Ownable {
 
     mapping(address => Winner) public winners;
 
+     // We are using a placeholder here only
+    IChampions internal immutable CHAMPIONS =
+        IChampions(0x4D0Def42Cf57D6f27CD4983042a55dce1C9F853c);
+    
+
     mapping(address => uint256) amounts;
 
     // Game could be of type loser or winner
@@ -74,10 +80,13 @@ contract CoinLeagues is Ownable {
         uint256 amount_to_play;
         uint256 total_amount_collected;
         address settings;
+        uint256 round;
     }
     bool houseClaimed = false;
 
     Player[] public players;
+
+    address[] public winnerPlayers;
 
     Game public game;
 
@@ -87,9 +96,11 @@ contract CoinLeagues is Ownable {
         uint256 _amount,
         uint256 _num_coins,
         uint256 _abort_timestamp,
+        uint256 _start_timestamp,
         GameType _game_type,
         address _settingsAddress,
-        uint256 _id
+        uint256 _id,
+        uint256 _round
     ) {
         game.settings = _settingsAddress;
         require(
@@ -115,6 +126,8 @@ contract CoinLeagues is Ownable {
             _game_type == GameType.Winner || _game_type == GameType.Loser,
             "Game type not supported"
         );
+        
+        require(_start_timestamp > block.timestamp - 10 minutes, "At least only past 10 minutes dates");
 
         game.num_players = _num_players;
         game.duration = _duration;
@@ -122,7 +135,9 @@ contract CoinLeagues is Ownable {
         game.amount_to_play = _amount;
         game.num_coins = _num_coins;
         game.abort_timestamp = _abort_timestamp;
+        game.start_timestamp = _start_timestamp;
         id = _id;
+        round = _round;
     }
 
     /**
@@ -133,7 +148,7 @@ contract CoinLeagues is Ownable {
         address[] memory coin_feeds,
         address captain_coin,
         uint256 champion_id
-    ) external payable {
+    ) external payable onlyOwner{
         require(players.length < game.num_players, "Game already full");
         require(
             game.num_coins == coin_feeds.length + 1,
@@ -173,7 +188,7 @@ contract CoinLeagues is Ownable {
             msg.value
         );
         players.push(
-            Player(coin_feeds, msg.sender, captain_coin, champion_id, 0)
+            Player(coin_feeds, msg.sender, captain_coin, champion_id, 0, address(0))
         );
         emit JoinedGame(msg.sender);
     }
@@ -208,7 +223,6 @@ contract CoinLeagues is Ownable {
             "Not meet min number of players"
         );
         require(game.aborted == false, "Game was aborted");
-        require(game.started == false, "Game already started");
         game.started = true;
         game.start_timestamp = block.timestamp;
         for (uint256 index = 0; index < players.length; index++) {
@@ -366,18 +380,21 @@ contract CoinLeagues is Ownable {
             }
         }
         if (players.length > 3) {
+            winnerPlayers.push(players[score1_index].player_address);
             winners[players[score1_index].player_address] = Winner({
                 place: 0,
                 winner_address: players[score1_index].player_address,
                 score: players[score1_index].score,
                 claimed: false
             });
+            winnerPlayers.push(players[score2_index].player_address);
             winners[players[score2_index].player_address] = Winner({
                 place: 1,
                 winner_address: players[score2_index].player_address,
                 score: players[score2_index].score,
                 claimed: false
             });
+            winnerPlayers.push(players[score3_index].player_address);
             winners[players[score3_index].player_address] = Winner({
                 place: 2,
                 winner_address: players[score3_index].player_address,
@@ -386,6 +403,7 @@ contract CoinLeagues is Ownable {
             });
             emit WinnedMultiple(players[score1_index].player_address, players[score2_index].player_address, players[score3_index].player_address);
         } else {
+            winnerPlayers.push(players[score1_index].player_address);
             winners[players[score1_index].player_address] = Winner({
                 place: 0,
                 winner_address: players[score1_index].player_address,
@@ -437,12 +455,12 @@ contract CoinLeagues is Ownable {
         emit HouseClaimed();
     }
 
-    function withdraw() external {
+    function withdraw(address payable owner) external {
         require(game.aborted == true, "Game not aborted");
-        uint256 amount = amounts[msg.sender];
-        require(amounts[msg.sender] > 0, "Amount different than zero");
-        amounts[msg.sender] = 0;
-        (bool sent, ) = msg.sender.call{value: amount}("");
+        uint256 amount = amounts[owner];
+        require(amounts[owner] > 0, "Amount different than zero");
+        amounts[owner] = 0;
+        (bool sent, ) = owner.call{value: amount}("");
         require(sent, "Failed to send Ether");
     }
 
@@ -485,5 +503,9 @@ contract CoinLeagues is Ownable {
 
     function getPlayers() external view returns (Player[] memory) {
         return players;
+    }
+
+    function getWinnerPlayers() external view returns (address[] memory) {
+        return winnerPlayers;
     }
 }

@@ -56,6 +56,9 @@ export default {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API}`,
         blockNumber: 12956195,
       },
+      accounts: {
+        count: 100
+      }
     },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",

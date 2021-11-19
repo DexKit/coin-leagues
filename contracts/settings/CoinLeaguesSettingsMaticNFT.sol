@@ -4,7 +4,7 @@ import "../interfaces/ICoinLeagueSettings.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // stores all settings of game
-contract CoinLeagueSettingsMatic is ICoinLeagueSettings {
+contract CoinLeagueSettingsMaticNFT is ICoinLeagueSettings {
     mapping(address => bool) private _chainlink_feeds;
     mapping(uint256 => bool) private _allowed_amount_players;
     mapping(uint256 => bool) private _allowed_amount_coins;
@@ -252,7 +252,7 @@ contract CoinLeagueSettingsMatic is ICoinLeagueSettings {
             BITTOKEN.balanceOf(msg.sender) >= HOLDING_BITT_MULTIPLIER ||
             DEXKIT.balanceOf(msg.sender) >= HOLDING_KIT_MULTIPLIER
         ) {
-            return int256(1200);
+            return int256(1300);
         } else {
             return int256(1200);
         }

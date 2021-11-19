@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
-import "./interfaces/ICoinLeagueSettings.sol";
-import "./interfaces/IChampions.sol";
+import "../interfaces/ICoinLeagueSettings.sol";
+import "../interfaces/IChampions.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CoinLeagues is Ownable {
+contract CoinLeaguesV2 is Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     enum GameType {
@@ -17,7 +17,7 @@ contract CoinLeagues is Ownable {
     }
     uint256 public id;
 
-    event JoinedGame(address playerAddress);
+    event JoinedGame(address playerAddress, address affiliate);
     event StartedGame(uint256 timestamp);
     event EndedGame(uint256 timestamp);
     event AbortedGame(uint256 timestamp);
@@ -25,6 +25,7 @@ contract CoinLeagues is Ownable {
     event Winned(address first);
     event WinnedMultiple(address first, address second, address third);
     event Claimed(address playerAddress, uint256 place, uint256 amountSend);
+    event Withdrawed(address playerAddress, uint256 timestamp);
 
     IChampions internal immutable CHAMPIONS =
         IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
@@ -35,6 +36,7 @@ contract CoinLeagues is Ownable {
         address captain_coin;
         uint256 champion_id;
         int256 score;
+        address affiliate;
     }
 
     struct Winner {
@@ -89,7 +91,8 @@ contract CoinLeagues is Ownable {
         uint256 _abort_timestamp,
         GameType _game_type,
         address _settingsAddress,
-        uint256 _id
+        uint256 _id,
+        uint256 _start_timestamp
     ) {
         game.settings = _settingsAddress;
         require(
@@ -103,6 +106,7 @@ contract CoinLeagues is Ownable {
             "Amount of coins not supported"
         );
         require(_abort_timestamp > block.timestamp, "Future date is required");
+        require(_start_timestamp > block.timestamp - 10 minutes, "At least only past 10 minutes dates");
         require(
             ICoinLeagueSettings(game.settings).isAllowedAmounts(_amount),
             "Amount not supported"
@@ -122,6 +126,7 @@ contract CoinLeagues is Ownable {
         game.amount_to_play = _amount;
         game.num_coins = _num_coins;
         game.abort_timestamp = _abort_timestamp;
+        game.start_timestamp = _start_timestamp;
         id = _id;
     }
 
@@ -132,6 +137,7 @@ contract CoinLeagues is Ownable {
     function joinGameWithCaptainCoin(
         address[] memory coin_feeds,
         address captain_coin,
+        address affiliate,
         uint256 champion_id
     ) external payable {
         require(players.length < game.num_players, "Game already full");
@@ -173,9 +179,9 @@ contract CoinLeagues is Ownable {
             msg.value
         );
         players.push(
-            Player(coin_feeds, msg.sender, captain_coin, champion_id, 0)
+            Player(coin_feeds, msg.sender, captain_coin, champion_id, 0, affiliate)
         );
-        emit JoinedGame(msg.sender);
+        emit JoinedGame(msg.sender, affiliate);
     }
 
     /**
@@ -203,14 +209,12 @@ contract CoinLeagues is Ownable {
      * When game starts we get all current prices for the coins of each player
      */
     function startGame() external onlyOwner {
-        require(
-            players.length == game.num_players,
-            "Not meet min number of players"
-        );
+        require(block.timestamp >= game.start_timestamp, "Game can not start yet");
+        // If time passed we can start game only with 2 players
+        require(players.length > 1, "Not meet min number of players");  
         require(game.aborted == false, "Game was aborted");
         require(game.started == false, "Game already started");
         game.started = true;
-        game.start_timestamp = block.timestamp;
         for (uint256 index = 0; index < players.length; index++) {
             Player memory pl = players[index];
             for (uint256 ind = 0; ind < pl.coin_feeds.length; ind++) {
@@ -221,6 +225,8 @@ contract CoinLeagues is Ownable {
             Coin storage captainCoin = coins[pl.captain_coin];
             captainCoin.start_price = getPriceFeed(pl.captain_coin);
         }
+        // We update here again with exact timestamp that game started
+        game.start_timestamp = block.timestamp;
         emit StartedGame(block.timestamp);
     }
 
@@ -437,13 +443,14 @@ contract CoinLeagues is Ownable {
         emit HouseClaimed();
     }
 
-    function withdraw() external {
+    function withdraw(address payable owner) external {
         require(game.aborted == true, "Game not aborted");
-        uint256 amount = amounts[msg.sender];
-        require(amounts[msg.sender] > 0, "Amount different than zero");
-        amounts[msg.sender] = 0;
-        (bool sent, ) = msg.sender.call{value: amount}("");
+        uint256 amount = amounts[owner];
+        require(amounts[owner] > 0, "Amount different than zero");
+        amounts[owner] = 0;
+        (bool sent, ) = owner.call{value: amount}("");
         require(sent, "Failed to send Ether");
+        emit Withdrawed(owner, block.timestamp);
     }
 
     // We call emergency when something buggy happens with one game, only to be used in last case, this likely mess's factory contract so need to be carefully

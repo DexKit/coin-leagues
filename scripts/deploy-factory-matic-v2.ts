@@ -4,7 +4,6 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 import hre  from "hardhat";
-
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
@@ -21,26 +20,12 @@ async function main() {
   await settings.deployed();
   console.log("Settings deployed to:", settings.address);
   // We get the contract to deploy
-  const Factory = await hre.ethers.getContractFactory("RoomFactory");
+  const Factory = await hre.ethers.getContractFactory("CoinLeaguesFactoryV2");
   const factory = await Factory.deploy(settings.address);
 
   await factory.deployed();
-  console.log("Factory deployed to:", factory.address);
-  // Fast Room Games
-  console.log("Creating the Rooms now");
-  const room1 = await factory.createRoom();
-  
-  console.log("room1:", room1);
-  // Daily Room Games
- /* const room2 = await factory.createRoom();
-  console.log("room2: ", room2);
-  // Weekly Room Games
-  const room3 = await factory.createRoom();
-  console.log("room3: ", room3);
-  const room4 = await factory.createRoom();
-  console.log("room4:", room4);*/
 
- 
+  console.log("Factory deployed to:", factory.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

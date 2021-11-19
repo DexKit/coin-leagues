@@ -16,7 +16,7 @@ contract RoomFactoryRoles is Ownable {
     }
 
     function createRoom() public returns (CoinLeaguesFactoryRoles factoryAddress){
-        factoryAddress = new CoinLeaguesFactoryRoles( _settings, msg.sender);
+        factoryAddress = new CoinLeaguesFactoryRoles( _settings, owner());
         factories.push(factoryAddress);
         factoryMap[address(factoryAddress)] = true;
         emit RoomCreated(msg.sender, address(factoryAddress));

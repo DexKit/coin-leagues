@@ -24,9 +24,17 @@ Using ChainLink Price Feeds
 4. When game duration is ended, user can end game
 5. If user is a winner he can claim the pot depending on the place he was in
 
+# V2 
+
+ - Set start timestamps, add affiliates
+
+
 # REFERENCES
 
 https://docs.matic.network/docs/develop/hardhat/
+
+# Polygon Deployed Contracts V2
+
 
 # Polygon Deployed Contracts
 

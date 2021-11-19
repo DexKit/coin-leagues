@@ -10,9 +10,9 @@ contract CoinLeagueSettingsETH is ICoinLeagueSettings {
     mapping(uint256 => bool) private _allowed_amounts;
     mapping(uint256 => bool) private _allowed_time_frames;
      IERC20 internal immutable BITTOKEN =
-        IERC20(0x82941691fBAeE671740Ed1B6A326B45081E6a011);
+        IERC20(0x9F9913853f749b3fE6D6D4e16a1Cc3C1656B6D51);
     IERC20 internal immutable DEXKIT =
-        IERC20(0xdf2e4383363609351637d262f6963D385b387340);
+        IERC20(0x7866E48C74CbFB8183cd1a929cd9b95a7a5CB4F4);
     uint256 constant HOLDING_BITT_MULTIPLIER = 200 * 10**18;
     uint256 constant HOLDING_KIT_MULTIPLIER = 50 * 10**18;
 
@@ -51,9 +51,13 @@ contract CoinLeagueSettingsETH is ICoinLeagueSettings {
         _allowed_amount_players[2] = true;
         _allowed_amount_players[5] = true;
         _allowed_amount_players[10] = true;
+        _allowed_amount_players[20] = true;
+        _allowed_amount_players[25] = true;
+        _allowed_amount_players[100] = true;
         // Allowed Amount Coins
         _allowed_amount_coins[1] = true;
         _allowed_amount_coins[2] = true;
+        _allowed_amount_coins[3] = true;
         _allowed_amount_coins[5] = true;
         _allowed_amount_coins[9] = true;
         _allowed_amount_coins[10] = true;
