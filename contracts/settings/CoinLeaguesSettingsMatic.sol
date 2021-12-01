@@ -268,9 +268,9 @@ contract CoinLeagueSettingsMatic is ICoinLeagueSettings {
             int256(1700),
             int256(1650),
             int256(1600),
-            int256(1600),
             int256(1550),
             int256(1500),
+            int256(1450),
             int256(1400),
             int256(1350)
         ];

@@ -59,7 +59,7 @@ contract CoinLeaguesV2 is Ownable {
 
     mapping(address => Winner) public winners;
 
-    mapping(address => uint256) amounts;
+    mapping(address => uint256) public amounts;
 
     // Game could be of type loser or winner
     struct Game {
@@ -149,6 +149,7 @@ contract CoinLeaguesV2 is Ownable {
             msg.value == game.amount_to_play,
             "You need to sent exactly the value of the pot"
         );
+        require(game.started == false, "Game already started");
         require(game.aborted == false, "Game was aborted");
         require(amounts[msg.sender] == 0, "You Already joined");
         // We pass this number if we want to not use champion id

@@ -14,18 +14,18 @@ async function main() {
   const [owner] = await hre.ethers.getSigners();
   console.log(owner.address);
 
- /* const Settings = await hre.ethers.getContractFactory("CoinLeagueSettingsMatic");
+  const Settings = await hre.ethers.getContractFactory("CoinLeagueSettingsMatic");
   const settings = await Settings.deploy();
 
   await settings.deployed();
-  console.log("Settings deployed to:", settings.address);*/
+  console.log("Settings deployed to:", settings.address);
   // We get the contract to deploy
   const Factory = await hre.ethers.getContractFactory("CoinLeaguesFactoryV2");
-  const factory = await Factory.deploy("0x4452D5719304D18D99742DA14803a0735e079D31", owner.address);
+  const factory  = await Factory.attach("0xa67b9dbfb1371debb7f60b681a74798f014cb007");
+  const set = await factory.setSettings(settings.address);
+  await set.wait();
+  console.log("new settings address")
 
-  await factory.deployed();
-
-  console.log("Factory deployed to:", factory.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

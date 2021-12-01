@@ -16,6 +16,8 @@
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic",
     "deploy:v2:polygon": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network matic",
+    "deploy-nft:v2:polygon": "npx hardhat run scripts/deploy-factory-nft-matic-v2.ts --network matic",
+    "update-settings:v2:polygon": "npx hardhat run scripts/update-settings-matic-v2.ts --network matic",
     "deploy:room:polygon": "npx hardhat run scripts/deploy-room-factory-matic.ts --network matic",
     "deploy-roles:polygon": "npx hardhat run scripts/deploy-factory-matic-roles.ts --network matic"
   },
