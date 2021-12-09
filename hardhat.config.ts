@@ -70,6 +70,10 @@ export default {
       accounts: [PRIVATE_KEY],
       gasPrice: 60000000000,
     },
+    bsc: {
+      url: `https://bsc-dataseed.binance.org/`,
+      accounts: [PRIVATE_KEY],
+    },
     polygon: {
       url: `https://polygon-rpc.com/`,
       accounts: {

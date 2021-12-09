@@ -11,18 +11,15 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
     mapping(uint256 => bool) private _allowed_amounts;
     mapping(uint256 => bool) private _allowed_time_frames;
     IERC20 internal immutable BITTOKEN =
-        IERC20(0xfd0cbdDec28a93bB86B9db4A62258F5EF25fEfdE);
+        IERC20(0x518445F0dB93863E5e93A7F70617c05AFa8048f1);
     IERC20 internal immutable DEXKIT =
-        IERC20(0x4D0Def42Cf57D6f27CD4983042a55dce1C9F853c);
+        IERC20(0x314593fa9a2fa16432913dBcCC96104541d32D11);
     uint256 constant HOLDING_BITT_MULTIPLIER = 200 * 10**18;
     uint256 constant HOLDING_KIT_MULTIPLIER = 50 * 10**18;
 
     constructor() {
                
         // BSC Mainnet
-
-        // AAPL / USD
-         _chainlink_feeds[0xb7Ed5bE7977d61E83534230f3256C021e0fae0B6] = true;
         // AAVE / USD
          _chainlink_feeds[0xA8357BF572460fC40f4B0aCacbB2a6A61c89f475] = true;
          // ADA / USD
@@ -113,8 +110,6 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          _chainlink_feeds[0x63A9133cd7c611d6049761038C16f238FddA71d7] = true;
           // JPM / USD
          _chainlink_feeds[0x8f26ba94180371baA2D2C143f96b6886DCACA250] = true;
-          // JPY / USD
-         _chainlink_feeds[0x22Db8397a6E77E41471dE256a7803829fDC8bC57] = true;
           // LINA / USD
          _chainlink_feeds[0x38393201952f2764E04B290af9df427217D56B41] = true;
           // LINK / USD
@@ -126,7 +121,7 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
           // MASK / USD
          _chainlink_feeds[0x4978c0abE6899178c1A74838Ee0062280888E2Cf] = true;
          // MATIC / USD
-         _chainlink_feeds[	0x7CA57b0cA6367191c94C8914d7Df09A57655905f] = true;
+         _chainlink_feeds[0x7CA57b0cA6367191c94C8914d7Df09A57655905f] = true;
          // MIM / USD
          _chainlink_feeds[0xc9D267542B23B41fB93397a93e5a1D7B80Ea5A01] = true;
          // MIR / USD
@@ -138,7 +133,7 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          // MSFT / USD
          _chainlink_feeds[0x5D209cE1fBABeAA8E6f9De4514A74FFB4b34560F] = true;
          // NFLX / USD
-         _chainlink_feeds[	0x1fE6c9Bd9B29e5810c2819f37dDa8559739ebeC9] = true;
+         _chainlink_feeds[0x1fE6c9Bd9B29e5810c2819f37dDa8559739ebeC9] = true;
          // NGN / USD
          _chainlink_feeds[0x1FF2B48ed0A1669d6CcC83f4B3c84FDdF13Ea594] = true;
          // NULS / USD
@@ -183,14 +178,6 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          _chainlink_feeds[0xC18c5A32c84CbbAc7D0F06Dd370198DA711c73C9] = true;
          // UNI / USD
          _chainlink_feeds[0xb57f259E7C24e56a1dA00F66b55A5640d9f9E7e4] = true;
-         // USDC / USD
-         _chainlink_feeds[0x51597f405303C4377E36123cBc172b13269EA163] = true;
-         // USDN / USD
-         _chainlink_feeds[0x7C0BC703Dc56645203CFeBE1928E34B8e885ae37] = true;
-         // USDT / USD
-         _chainlink_feeds[0xB97Ad0E74fa7d920791E90258A6E2085088b4320] = true;
-         // UST / USD
-         _chainlink_feeds[0xcbf8518F8727B8582B22837403cDabc53463D462] = true;
          // VAI / USD
          _chainlink_feeds[0x058316f8Bb13aCD442ee7A216C7b60CFB4Ea1B53] = true;
          // VT / USD
@@ -212,16 +199,16 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          // XVS / USD
          _chainlink_feeds[0xBF63F430A79D4036A5900C19818aFf1fa710f206] = true;
          // YFI / USD
-         _chainlink_feeds[	0xD7eAa5Bf3013A96e3d515c055Dbd98DbdC8c620D] = true;
+         _chainlink_feeds[0xD7eAa5Bf3013A96e3d515c055Dbd98DbdC8c620D] = true;
          // YFII / USD
-         _chainlink_feeds[	0xC94580FAaF145B2FD0ab5215031833c98D3B77E4] = true;
+         _chainlink_feeds[0xC94580FAaF145B2FD0ab5215031833c98D3B77E4] = true;
          // ZIL / USD
          _chainlink_feeds[0x3e3aA4FC329529C8Ab921c810850626021dbA7e6] = true;
              
 
         // Allowed Amounts
+        _allowed_amounts[0.0001 ether] = true;
         _allowed_amounts[0.01 ether] = true;
-        _allowed_amounts[0.1 ether] = true;
         _allowed_amounts[1 ether] = true;
         _allowed_amounts[3 ether] = true;
         _allowed_amounts[5 ether] = true;
@@ -305,7 +292,7 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
 
     function getPrizesPlayers()
         external
-        view
+        pure
         override
         returns (uint256[3] memory)
     {
