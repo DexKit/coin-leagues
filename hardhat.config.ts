@@ -12,7 +12,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const { ALCHEMY_API, PRIVATE_KEY } = process.env;
+const { ALCHEMY_API, PRIVATE_KEY, MENMONIC } = process.env;
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -68,6 +68,14 @@ export default {
     matic: {
       url: `https://polygon-rpc.com/`,
       accounts: [PRIVATE_KEY],
+      gasPrice: 60000000000,
+    },
+    polygon: {
+      url: `https://polygon-rpc.com/`,
+      accounts: {
+        mnemonic: MENMONIC,
+        count: 50
+      },
       gasPrice: 60000000000,
     },
   },

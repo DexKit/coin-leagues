@@ -21,7 +21,7 @@ async function main() {
   console.log("Settings deployed to:", settings.address);
   // We get the contract to deploy
   const Factory = await hre.ethers.getContractFactory("CoinLeaguesFactoryV2");
-  const factory  = await Factory.attach("0xa67b9dbfb1371debb7f60b681a74798f014cb007");
+  const factory  = await Factory.attach("0xb9E4B1719b575541d008f30BbB379C66C13d2C4b");
   const set = await factory.setSettings(settings.address);
   await set.wait();
   console.log("new settings address")
