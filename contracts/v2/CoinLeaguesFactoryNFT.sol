@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  *
  */
 contract CoinLeaguesFactoryV2NFT is Ownable {
-    CoinLeaguesV2[] public allGames;
+    CoinLeaguesV2NFT[] public allGames;
     address private _settings;
     bool public allow_create = true;
 
@@ -34,9 +34,9 @@ contract CoinLeaguesFactoryV2NFT is Ownable {
         uint8 _num_coins,
         uint256 _abort_timestamp,
         uint256 _start_timestamp,
-        CoinLeaguesV2.GameType _game_type,
+        CoinLeaguesV2NFT.GameType _game_type,
         uint256 _championRoom
-    ) external returns (CoinLeaguesV2 gameAddress) {
+    ) external returns (CoinLeaguesV2NFT gameAddress) {
         require(allow_create == true, "Game creation was stopped");
         uint256 index = allGames.length;
         gameAddress = new CoinLeaguesV2NFT(
@@ -55,17 +55,17 @@ contract CoinLeaguesFactoryV2NFT is Ownable {
         emit GameCreated(address(gameAddress), allGames.length - 1);
     }
 
-    function startGame(CoinLeaguesV2 gameAddress) external {
+    function startGame(CoinLeaguesV2NFT gameAddress) external {
         require(address(gameAddress) != address(0), "No null address");
         gameAddress.startGame();
     }
 
-    function endGame(CoinLeaguesV2 gameAddress) external {
+    function endGame(CoinLeaguesV2NFT gameAddress) external {
         require(address(gameAddress) != address(0), "No null address");
         gameAddress.endGame();
     }
 
-    function abortGame(CoinLeaguesV2 gameAddress) external {
+    function abortGame(CoinLeaguesV2NFT gameAddress) external {
         require(address(gameAddress) != address(0), "No null address");
         gameAddress.abortGame();
     }
