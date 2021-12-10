@@ -152,7 +152,7 @@ contract CoinLeagueSettingsMaticNFT is ICoinLeagueSettings {
         _chainlink_feeds[0x6EA4d89474d9410939d429B786208c74853A5B47] = true;
 
         // Allowed Amounts
-        _allowed_amounts[0.01 ether] = true;
+        _allowed_amounts[0.001 ether] = true;
         _allowed_amounts[0.1 ether] = true;
         _allowed_amounts[1 ether] = true;
         _allowed_amounts[3 ether] = true;
