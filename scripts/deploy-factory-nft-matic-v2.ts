@@ -20,7 +20,7 @@ async function main() {
   await settings.deployed();
   console.log("Settings deployed to:", settings.address);
   // We get the contract to deploy
-  const Factory = await hre.ethers.getContractFactory("CoinLeaguesFactoryV2");
+  const Factory = await hre.ethers.getContractFactory("CoinLeaguesFactoryV2NFT");
   const factory = await Factory.deploy(settings.address, owner.address);
 
   await factory.deployed();
