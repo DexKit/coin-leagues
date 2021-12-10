@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract SquidGame is Ownable {
@@ -15,6 +15,7 @@ contract SquidGame is Ownable {
     bool[6] challengeResult;
     mapping(address => bool) public Play;
     mapping(uint256 => Play) public PlayersPlay;
+    mapping(uint256 => address[]) public PlayersRound;
 
     address[] public PlayersRound1;
     address[] public PlayersRound2;
@@ -22,7 +23,7 @@ contract SquidGame is Ownable {
     address[] public PlayersRound4;
     address[] public PlayersRound5;
     address[] public PlayersRound6;
-    mapping(address => bool) public PlayersRound1Map;
+    mapping(address => Play) public PlayersRoundMap;
     mapping(address => bool) public PlayersRound2Map;
     mapping(address => bool) public PlayersRound3Map;
     mapping(address => bool) public PlayersRound4Map;
@@ -40,78 +41,112 @@ contract SquidGame is Ownable {
 
     function joinGame() external payable{
         require(msg.value == pot, "Need to sent exact amount of pot");
-        require(PlayersRound1Map[msg.sender] == false, "Already joined");
-        PlayersRound1.push(msg.sender);
-        PlayersRound1Map[msg.sender] = true;
+        require(PlayersRoundMap[msg.sender] == false, "Already joined");
+        PlayersRound[currentRound].push(msg.sender);
+        PlayersRoundMap[0][msg.sender] = true;
     }
 
     function goNextChallenge() external {
         if(currentRound == 1){
             require(PlayersPlay[0][msg.sender] == challengeResult[currentRound], "you not passed challenge");
-
+            PlayersRound[currentRound].push(msg.sender);
         }
         if(currentRound == 2){
             require(PlayersPlay[1][msg.sender] == challengeResult[currentRound], "you not passed challenge");
-
+             PlayersRound[currentRound].push(msg.sender);
         }
         if(currentRound == 3){
             require(PlayersPlay[2][msg.sender] == challengeResult[currentRound], "you not passed challenge");
-
+             PlayersRound[currentRound].push(msg.sender);
         }
         if(currentRound == 4){
             require(PlayersPlay[3][msg.sender] == challengeResult[currentRound], "you not passed challenge");
-
+             PlayersRound[currentRound].push(msg.sender);
         }
         if(currentRound == 5){
             require(PlayersPlay[4][msg.sender] == challengeResult[currentRound], "you not passed challenge");
-
+             PlayersRound[currentRound].push(msg.sender);
         }
         if(currentRound == 6){
             require(PlayersPlay[5][msg.sender] == challengeResult[currentRound], "you not passed challenge");
-
+             PlayersRound[currentRound].push(msg.sender);
         }
+    }
+    /**
+    * Total pot depends on eleminated players
+     */
+    function getTotalPot() external view returns(uint256){
+        if(currentRound > 0){
+            return (PlayersRound[0].length - PlayersRound[currentRound].length)*pot;
+        }else{
+            return 0;
+        }
+    }
+    function getCurrentPlayers() external view returns(uint256){
+        return PlayersRound[currentRound].length;
+    }
 
-        
+    function getCurrentPlayersAtRound(uint256 round) external view returns(uint256){
+        require(round < currentRound, "round can not be higher than current one");
+        return PlayersRound[round].length;
+    }
+
+    function startChallengeOne() external {
+        require(currentRound == 1, "You need to be on round 1");
 
     }
 
-    function challengeOne(bool play) external {
+    function endChallengeOne() external {
+
+        currentRound = 2;
+    }
+
+
+
+
+    function enterChallengeOne(bool play) external {
         require(block.timestamp > startTimestamp, "not started yet");
         require(block.timestamp < endTimestamp,   "challenge finished");
-        require(PlayersRound1Map[msg.sender] == true,  "Player needs join game first");
+        require(PlayersRoundMap[0][msg.sender] == true,  "Player needs join game first");
         PlayersPlay[0][msg.sender] = play;
     }
 
-    function challengeTwo(bool play) external {
+    function enterChallengeTwo(bool play) external {
         require(block.timestamp > startTimestamp, "not started yet");
         require(block.timestamp < endTimestamp,   "challenge finished");
-        require(PlayersRound2Map[msg.sender] == true,  "Player needs pass round first");
+        require(PlayersRoundMap[1][msg.sender] == true,  "Player needs pass round first");
         PlayersPlay[1][msg.sender] = play;
     }
 
 
-    function challengeThird(bool play) external {
+    function enterChallengeThird(bool play) external {
         require(block.timestamp > startTimestamp, "not started yet");
-        require(PlayersRound3Map[msg.sender] == true,  "Player needs pass round first");
+        require(PlayersRoundMap[2][msg.sender] == true,  "Player needs pass round first");
         PlayersPlay[2][msg.sender] = play;
     }
 
-    function challengeFourth(bool play) external {
+    function enterChallengeFourth(bool play) external {
         require(block.timestamp > startTimestamp, "not started yet");
-        require(PlayersRound4Map[msg.sender] == true,  "Player needs pass round first");
+        require(PlayersRoundMap[3][msg.sender] == true,  "Player needs pass round first");
         PlayersPlay[3][msg.sender] = play;
     }
 
-    function challengeFive(bool play) external {
+    function enterChallengeFive(bool play) external {
         require(block.timestamp > startTimestamp, "not started yet");
-        require(PlayersRound5Map[msg.sender] == true,  "Player needs pass round first");
+        require(PlayersRoundMap[4][msg.sender] == true,  "Player needs pass round first");
         PlayersPlay[4][msg.sender] = play;
     }
 
-    function challengeSix(bool play) external {
+    function enterChallengeSix(bool play) external {
         require(block.timestamp > startTimestamp, "not started yet");
-        require(PlayersRound6Map[msg.sender] == true,  "Player needs pass round first");
+        require(PlayersRoundMap[4][msg.sender] == true,  "Player needs pass round first");
         PlayersPlay[5][msg.sender] = play;
+    }
+
+     function getPriceFeed(address coin_feed) public view returns (int256) {
+        (, int256 price, , , ) = AggregatorV3Interface(coin_feed)
+            .latestRoundData();
+        return price;
     }
 
 

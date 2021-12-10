@@ -26,7 +26,11 @@ Using ChainLink Price Feeds
 
 # V2 
 
- - Set start timestamps, add affiliates
+ - Set start timestamps, add 
+ 
+# TODO
+
+ - [] Organize code 
 
 
 # REFERENCES

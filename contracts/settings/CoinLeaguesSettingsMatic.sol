@@ -241,7 +241,7 @@ contract CoinLeagueSettingsMatic is ICoinLeagueSettings {
 
     function getPrizesPlayers()
         external
-        view
+        pure
         override
         returns (uint256[3] memory)
     {

@@ -4,7 +4,7 @@
   "main": "index.ts",
   "repository": "https://github.com/DexKit/coins-league.git",
   "engines": {
-    "node": "12.18.3"
+    "node": "16.13.1"
   },
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
@@ -15,6 +15,7 @@
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic",
     "deploy:v2:polygon": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network matic",
+    "deploy:v2:binance": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network bsc",
     "deploy-nft:v2:polygon": "npx hardhat run scripts/deploy-factory-nft-matic-v2.ts --network matic",
     "update-settings:v2:polygon": "npx hardhat run scripts/update-settings-matic-v2.ts --network matic",
     "deploy:room:polygon": "npx hardhat run scripts/deploy-room-factory-matic.ts --network matic",
@@ -50,6 +51,7 @@
   "dependencies": {
     "@chainlink/contracts": "^0.2.1",
     "@openzeppelin/contracts": "^4.3.2",
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "dotenv": "^10.0.0"
   }
 }
