@@ -93,7 +93,7 @@ contract CoinLeaguesV2NFT is Ownable {
         GameType _game_type,
         address _settingsAddress,
         uint256 _id,
-        uint256 _start_timestamp
+        uint256 _start_timestamp,
         uint256 _championRoom
     ) {
         game.settings = _settingsAddress;

@@ -60,7 +60,7 @@ export default {
         count: 100
       }
     },
-    mumbai: {
+  /*  mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       gasPrice: 8000000000,
       accounts: [PRIVATE_KEY],
@@ -81,7 +81,7 @@ export default {
         count: 50
       },
       gasPrice: 60000000000,
-    },
+    },*/
   },
   gasReporter: {
     enabled: true,
