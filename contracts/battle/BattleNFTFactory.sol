@@ -10,28 +10,32 @@ contract BattleNFTFactory is Ownable {
     IChampions internal immutable CHAMPIONS =
         IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
 
-    address payable HOUSE = address(0);
+    address HOUSE = 0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D;
 
+    event CreatedGame(uint256 id, uint256 champion_id, address created_by, uint256 created_at);
+    event JoinedGame (uint256 id, uint256 champion_id, address created_by, uint256 created_at);
+    event GameStarted (uint256 id, uint256 created_at);
+    event GameFinished (uint256 id, uint256 created_at, address winner);
+    event Claimed(uint256 id, uint256 amount, address claimer, uint256 created_at);
+    event Aborted(uint256 id, uint256 created_at);
+    event Withdrawed(uint256 id, uint256 created_at);
 
     struct Coin {
         // Struct
         address coin_feed;
+        uint256 champion_id;
+        int256 multiplier;
         int256 start_price;
         int256 end_price;
         int256 score;
+        int256 champion_score;
     }
 
-    Coin public coin_player1;
-    Coin public coin_player2;
+    mapping(uint256 => Coin ) public coin_player1;
+    mapping(uint256 => Coin ) public coin_player2;
 
     struct Game{
        uint256 id;
-       uint256 champion1;
-       uint256 champion2;
-       int256 multiplier_champion1;
-       int256 multiplier_champion2;
-       int256 champion1_score;
-       int256 champion2_score;
        bool claimed;
        bool started;
        bool finished;
@@ -47,36 +51,35 @@ contract BattleNFTFactory is Ownable {
 
     Game[] public allGames;
 
-    constructor(){
-
-    }
-
     /**
      * Create battle and join at same time
      *
      */
-    function createAndJoinGame(uint256 champion_id, uint256 bitt_feed, uint256 multiplier, uint256 start_timestamp, uint256 duration, uint256 entry) external payable{
+    function createAndJoinGame(uint256 champion_id, uint256 bitt_feed, int256 multiplier, uint256 start_timestamp, uint256 duration, uint256 entry) external payable{
         require(entry == msg.value, "Sent exact value");
         require(start_timestamp > block.timestamp, "require future date");
         require(CHAMPIONS.ownerOf(champion_id) == msg.sender, "You need to own this champion" );
-        uint256 rarity = IChampions.getRarityOf(champion_id);
-        // Bittoken can impersonate other coins
+        uint256 rarity = CHAMPIONS.getRarityOf(champion_id);
+       
+        uint256 id = allGames.length;
+         // Bittoken can impersonate other coins
         if( rarity == 0){
             require(bitt_feed > 0 && bitt_feed < 9, "feed not supported");
-            coin_player1.coin_feed = getChampionsFeed()[bitt_feed];
+            coin_player1[id].coin_feed = getChampionsFeed()[bitt_feed];
         }else{
-             coin_player1.coin_feed = getChampionsFeed()[rarity];
+            coin_player1[id].coin_feed = getChampionsFeed()[rarity];
         }
-
-        uint256 id = allGames.length;
+        coin_player1[id].champion_id = champion_id; 
+        coin_player1[id].multiplier = multiplier;
         
         allGames.push(
-            Game(id, champion_id, -1, 0, 0, 0, 0, 0, false, false, false, false, entry, msg.sender, address(0), duration, start_timestamp, address(0))
+            Game(id, false, false, false, false, false, entry, msg.sender, address(0), duration, start_timestamp, address(0))
         );
+        emit CreatedGame(id, champion_id, msg.sender, block.timestamp);
 
     }
 
-    function joinGame(uint256 id, uint256 champion_id, uint256 bitt_feed, uint256 multiplier) external payable{
+    function joinGame(uint256 id, uint256 champion_id, uint256 bitt_feed, int256 multiplier) external payable{
         require(id < allGames.length, "Game not exists");
         Game storage game = allGames[id];
         require(game.player2 == address(0), "game already full");
@@ -88,10 +91,13 @@ contract BattleNFTFactory is Ownable {
         // Bittoken can impersonate other coins
         if( rarity == 0){
             require(bitt_feed > 0 && bitt_feed < 9, "feed not supported");
-            coin_player2.coin_feed = getChampionsFeed()[bitt_feed];
+            coin_player2[id].coin_feed = getChampionsFeed()[bitt_feed];
         }else{
-            coin_player2.coin_feed = getChampionsFeed()[rarity];
+            coin_player2[id].coin_feed = getChampionsFeed()[rarity];
         }
+        coin_player2[id].multiplier = multiplier;
+        coin_player2[id].champion_id = champion_id;
+        emit JoinedGame(id, champion_id, msg.sender, block.timestamp);
         
     }
 
@@ -99,65 +105,69 @@ contract BattleNFTFactory is Ownable {
         require(id < allGames.length);
         Game storage game = allGames[id];
         require(game.start_timestamp > block.timestamp, "Game can not start yet");
+        require(game.started == false, "game already started");
+        require(game.aborted == false, "Game  aborted");
         require(game.player2 != address(0), "game not full");
-        coin_player1.start_price =  getPriceFeed(coin_player1.coin_feed);
-        coin_player2.start_price =  getPriceFeed(coin_player2.coin_feed);
-
-
+        coin_player1[id].start_price =  getPriceFeed(coin_player1[id].coin_feed);
+        coin_player2[id].start_price =  getPriceFeed(coin_player2[id].coin_feed);
         game.started = true;
-
+        emit GameStarted(id, block.timestamp);
     }
 
     function endGame(uint256 id) external{
         require(id < allGames.length);
         Game storage game = allGames[id];
         require(game.started == true, "game not started");
+        require(game.aborted == false, "Game   aborted");
         require(game.finished == false, "game not finished");
         require(game.start_timestamp + game.duration > block.timestamp, "duration still not elapsed");
-        coin_player1.end_price =  getPriceFeed(coin_player1.coin_feed);
-        coin_player2.end_price =  getPriceFeed(coin_player2.coin_feed);
-        coin_player1.score = (((coin_player1.end_price - coin_player1.start_price)) / coin_player1.end_price) * game.multiplier_champion1;
-        coin_player2.score = (((coin_player2.end_price - coin_player2.start_price)) / coin_player2.end_price) * game.multiplier_champion2;
-        uint256 champion1 = game.champion1;
-        uint256 champion2 = game.champion2;
-        game.champion1_score = coin_player1.score + CHAMPIONS.getAttackOf(champion1) + CHAMPIONS.getRunOf(champion1) + CHAMPIONS.getAttackOf(champion1);
-        game.champion2_score = coin_player2.score + CHAMPIONS.getAttackOf(champion2) + CHAMPIONS.getRunOf(champion2) + CHAMPIONS.getAttackOf(champion2);
-        if(game.champion1_score > game.champion2_score){
+        coin_player1[id].end_price =  getPriceFeed(coin_player1[id].coin_feed);
+        coin_player2[id].end_price =  getPriceFeed(coin_player2[id].coin_feed);
+        coin_player1[id].score = (((coin_player1[id].end_price - coin_player1[id].start_price)) / coin_player1[id].end_price) * coin_player1[id].multiplier;
+        coin_player2[id].score = (((coin_player2[id].end_price - coin_player2[id].start_price)) / coin_player2[id].end_price) * coin_player2[id].multiplier;
+        uint256 champion1 = coin_player1[id].champion_id;
+        uint256 champion2 = coin_player2[id].champion_id;
+        coin_player1[id].champion_score = coin_player1[id].score + int256(CHAMPIONS.getAttackOf(champion1)) + int256(CHAMPIONS.getRunOf(champion1)) + int256(CHAMPIONS.getAttackOf(champion1));
+        coin_player2[id].champion_score = coin_player2[id].score + int256(CHAMPIONS.getAttackOf(champion2)) + int256(CHAMPIONS.getRunOf(champion2)) + int256(CHAMPIONS.getAttackOf(champion2));
+        // In case of draw, the creator wins
+        if(coin_player1[id].champion_score >= coin_player2[id].champion_score){
             game.winner = game.player1;
         }else{
             game.winner = game.player2;
         }
 
         game.finished = true;
+        emit GameFinished(id, block.timestamp, game.winner);
         
     }
 
     function claim(uint256 id) external{
         require(id < allGames.length);
         Game storage game = allGames[id];
-        require(game.winner == msg.sender, "Not winner");
         require(game.claimed == false, "Already claimed");
         require(game.finished == true, "Game not finished");
         require(game.winner != address(0), "Winner not zero address");
         game.claimed = true;
-
-        uint256 amountHouse = game.entry* 2 * (10/100);
-        uint256 amountWinner = game.entry * 2 - amountHouse;
+        uint256 totalPrize = game.entry*2;
+        // House takes 10% of the game, wich is 2 * game entry
+        uint256 amountHouse = (totalPrize*10)/100 ;
+        uint256 amountWinner = totalPrize - amountHouse;
 
         (bool sentHouse, ) = HOUSE.call{value: amountHouse}("");
         require(sentHouse, "Failed to send Ether");
         (bool sent, ) = game.winner.call{value: amountWinner}("");
-        require(sentHouse, "Failed to send Ether");
-
+        require(sent, "Failed to send Ether");
+        emit Claimed(id,  amountWinner, game.winner, block.timestamp );
     }
 
     function abortGame(uint256 id) external{
          require(id < allGames.length);
          Game storage game = allGames[id];
-         require(game.start == false, "Game  already started");
+         require(game.started == false, "Game  already started");
          require(game.aborted == false, "Game  already aborted");
          require(game.player2 == address(0), "Game  is already full");
          game.aborted = true;
+         emit Aborted(id, block.timestamp);
     }
 
 
@@ -165,9 +175,11 @@ contract BattleNFTFactory is Ownable {
     function withdraw(uint256 id) external{
         Game storage game = allGames[id];
         require(game.aborted == true, "Game  not aborted");
-        require(game.withdrawed == false, "Game  already withdrawed");
+        require(game.withdrawed == false, "Game already withdrawed");
         game.withdrawed = true;
         (bool sent, ) = game.player1.call{value: game.entry}("");
+        require(sent, "Failed to send Ether");
+        emit Withdrawed(id, block.timestamp);
     }
     /**
      * returns feed associated with coin
@@ -175,7 +187,6 @@ contract BattleNFTFactory is Ownable {
     function getChampionsFeed()
         internal
         pure
-        override
         returns (address[8] memory)
     {
         return [

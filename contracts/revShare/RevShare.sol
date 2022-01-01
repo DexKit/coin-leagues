@@ -3,10 +3,12 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IChampions.sol";
 
 contract RevShare is Ownable{
 
+    using SafeERC20 for IERC20;
     IChampions internal immutable CHAMPIONS =
         IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
 
@@ -31,7 +33,10 @@ contract RevShare is Ownable{
     function createShare(uint256 amount, uint256 start_timestamp, uint256 duration) external onlyOwner{
         require(start_timestamp > block.timestamp, "require future date");
         uint256 id = shares.length;
-        shares.push(Share(amount, start_timestamp, duration));
+        Share storage sh = shares.push();
+        sh.amount = amount;
+        sh.start_timestamp = start_timestamp;
+        sh.duration = duration;
         emit CreatedShare(id, amount, start_timestamp, duration);
     }
 
@@ -49,10 +54,10 @@ contract RevShare is Ownable{
         require(shares.length < id, "Id Not exists");
         Share storage share = shares[id];
         require(share.start_timestamp + share.duration > block.timestamp, "Still on subscribe period");
-        require(share[id].claimed[msg.sender] == false, "already claimed");
-        share[id].claimed[msg.sender] = true;
+        require(share.claimed[msg.sender] == false, "already claimed");
+        share.claimed[msg.sender] = true;
         uint256 amountPerClaim = share.amount/share.total_claims;
-        uint256 totalAmountClaim = amountPerClaim*share[id].claims[msg.sender];
+        uint256 totalAmountClaim = amountPerClaim*share.claims[msg.sender];
         BITTOKEN.safeTransfer(msg.sender, totalAmountClaim );
         emit ShareClaimed(msg.sender, totalAmountClaim, block.timestamp);
     }
