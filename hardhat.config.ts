@@ -12,7 +12,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const { ALCHEMY_API, PRIVATE_KEY, MENMONIC } = process.env;
+const { ALCHEMY_API, ALCHEMY_POLYGON_API, PRIVATE_KEY, MENMONIC } = process.env;
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -51,7 +51,7 @@ export default {
     ],
   },
   networks: {
-    hardhat: {
+    /*hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API}`,
         blockNumber: 12956195,
@@ -59,8 +59,19 @@ export default {
       accounts: {
         count: 100
       }
+    },*/
+    hardhat: {
+      forking: {
+        url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_POLYGON_API}`,
+        blockNumber: 23260291,
+      },
+      accounts: {
+        count: 100
+      }
     },
-  /*  mumbai: {
+
+
+    mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       gasPrice: 8000000000,
       accounts: [PRIVATE_KEY],
@@ -81,12 +92,15 @@ export default {
         count: 50
       },
       gasPrice: 60000000000,
-    },*/
+    },
   },
   gasReporter: {
     enabled: true,
   },
   mocha: {
     timeout: 2000000,
+  },
+  paths:{
+    sources: "./contracts/battle",
   }
 };

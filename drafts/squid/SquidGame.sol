@@ -101,6 +101,56 @@ contract SquidGame is Ownable {
         currentRound = 2;
     }
 
+    function startChallengeTwo() external {
+        require(currentRound == 2, "You need to be on round 1");
+
+    }
+
+    function endChallengeTwo() external {
+
+        currentRound = 3;
+    }
+
+    function startChallengeThird() external {
+        require(currentRound == 3, "You need to be on round 1");
+
+    }
+
+    function endChallengeThird() external {
+
+        currentRound = 4;
+    }
+
+    function startChallengeFourth() external {
+        require(currentRound == 4, "You need to be on round 1");
+
+    }
+
+    function endChallengeFourth() external {
+
+        currentRound = 5;
+    }
+
+    function startChallengeFifth() external {
+        require(currentRound == 5, "You need to be on round 1");
+
+    }
+
+    function endChallengeFifth() external {
+
+        currentRound = 6;
+    }
+
+    function startChallengeSix() external {
+        require(currentRound == 5, "You need to be on round 1");
+
+    }
+
+    function endChallengeSix() external {
+
+        currentRound = 6;
+    }
+
 
 
 
@@ -143,7 +193,7 @@ contract SquidGame is Ownable {
         PlayersPlay[5][msg.sender] = play;
     }
 
-     function getPriceFeed(address coin_feed) public view returns (int256) {
+    function getPriceFeed(address coin_feed) public view returns (int256) {
         (, int256 price, , , ) = AggregatorV3Interface(coin_feed)
             .latestRoundData();
         return price;

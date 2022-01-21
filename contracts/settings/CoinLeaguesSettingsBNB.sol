@@ -115,7 +115,7 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
           // LINK / USD
          _chainlink_feeds[0xca236E327F629f9Fc2c30A4E95775EbF0B89fac8] = true;
           // LIT / USD
-         _chainlink_feeds[	0x83766bA8d964fEAeD3819b145a69c947Df9Cb035] = true;
+         _chainlink_feeds[0x83766bA8d964fEAeD3819b145a69c947Df9Cb035] = true;
           // LTC / USD
          _chainlink_feeds[0x74E72F37A8c415c8f1a98Ed42E78Ff997435791D] = true;
           // MASK / USD

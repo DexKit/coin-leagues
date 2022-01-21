@@ -10,7 +10,7 @@ contract BattleNFTFactory is Ownable {
     IChampions internal immutable CHAMPIONS =
         IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
 
-    address HOUSE = 0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D;
+    address HOUSE = 0x3330b5cbdADB53e91968c6bc12E6A8c5D0C944dd;
 
     event CreatedGame(uint256 id, uint256 champion_id, address created_by, uint256 created_at);
     event JoinedGame (uint256 id, uint256 champion_id, address created_by, uint256 created_at);
