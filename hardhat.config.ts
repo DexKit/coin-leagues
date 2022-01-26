@@ -101,6 +101,6 @@ export default {
     timeout: 2000000,
   },
   paths:{
-    sources: "./contracts/battle",
+    sources: "./contracts/revShare",
   }
 };

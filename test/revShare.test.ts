@@ -32,12 +32,14 @@ describe("RevShare", function () {
         const amount = BigNumber.from('10').pow('17');
         const duration = 100;
         const start_timestamp = Math.floor((new Date().getTime() / 1000) + 1000);
-        await revShare.createShare(amount, start_timestamp, duration);
+        const bittokenAddress = "0xfd0cbdDec28a93bB86B9db4A62258F5EF25fEfdE";
+        await revShare.createShare(amount, start_timestamp, duration, bittokenAddress);
     })
 
     it("Should create a share, subscrive and sent", async function () {
         const RevShare = await ethers.getContractFactory("RevShare");
         const Bittoken = await ethers.getContractFactory("Token");
+        const bittokenAddress = "0xfd0cbdDec28a93bB86B9db4A62258F5EF25fEfdE";
         const bittoken = Bittoken.attach("0xfd0cbdDec28a93bB86B9db4A62258F5EF25fEfdE");
         const revShare = await RevShare.deploy();
         await revShare.deployed();
@@ -49,7 +51,8 @@ describe("RevShare", function () {
         console.log("before timetsamp ", timestamp)
         const start_timestamp = timestamp + 100;
         console.log("before start timetsamp ", start_timestamp)
-        await revShare.createShare(amount, start_timestamp, duration);
+        // Creates a share for Bittoken 
+        await revShare.createShare(amount, start_timestamp, duration, bittokenAddress);
         console.log( (await revShare.shares(0)).start_timestamp.toString())
         console.log( (await revShare.shares(0)).duration.toString())
         let blocksToAdvance = 2;
@@ -72,7 +75,7 @@ describe("RevShare", function () {
         );
         
 
-        // expect(revShare.subscribeShare(1)).to.be.revertedWith('Subscribe for this id already expired');
+        // We here subscribe to the share with the NFT
         await revShare.connect(nftSigner).subscribeShare(0, [17, 15, 19]);
 
         await revShare.connect(nftSigner).subscribeShare(0, [17, 15, 19]);
@@ -94,6 +97,7 @@ describe("RevShare", function () {
         for (let index = 0; index < blocksToAdvance; index++) {
             await network.provider.send('evm_mine');
         }
+        // After subscribe period user is able to claim share
         await revShare.connect(nftSigner).claimShare(0);
 
     })

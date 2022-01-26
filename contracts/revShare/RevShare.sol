@@ -11,14 +11,13 @@ contract RevShare is Ownable {
     IChampions internal immutable CHAMPIONS =
         IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
 
-    IERC20 internal immutable BITTOKEN =
-        IERC20(0xfd0cbdDec28a93bB86B9db4A62258F5EF25fEfdE);
-
     struct Share {
         uint256 amount;
         uint256 total_claims;
         uint256 start_timestamp;
         uint256 duration;
+        uint256 amount_claimed;
+        address token_to_share;
         mapping(address => uint256) claims;
         mapping(address => bool) claimed;
         mapping(uint256 => bool) ids;
@@ -28,21 +27,32 @@ contract RevShare is Ownable {
         uint256 id,
         uint256 amount,
         uint256 start_timestamp,
-        uint256 duration
+        uint256 duration,
+        address token_share
     );
+
+    event UpdatedShare(
+        uint256 id,
+        uint256 amount,
+        uint256 start_timestamp,
+        uint256 duration,
+        address token_share
+    );
+
     event ShareSubscribed(
         address subscriber,
         uint256 claims,
-        uint256 subscribedAt
+        uint256 subscribed_at
     );
-    event ShareClaimed(address subscriber, uint256 amount, uint256 claimedAt);
+    event ShareClaimed(address subscriber, uint256 amount, uint256 claimed_at, address token_to_share);
 
     Share[] public shares;
 
     function createShare(
         uint256 amount,
         uint256 start_timestamp,
-        uint256 duration
+        uint256 duration,
+        address token
     ) external onlyOwner {
         require(start_timestamp > block.timestamp, "require future date");
         uint256 id = shares.length;
@@ -50,7 +60,29 @@ contract RevShare is Ownable {
         sh.amount = amount;
         sh.start_timestamp = start_timestamp;
         sh.duration = duration;
-        emit CreatedShare(id, amount, start_timestamp, duration);
+        sh.token_to_share = token;
+        sh.amount_claimed = 0;
+        emit CreatedShare(id, amount, start_timestamp, duration, token);
+    }
+    /**
+    /* Update share, only possible if share not started yet
+     */
+    function updateShare(
+        uint256 id,
+        uint256 amount,
+        uint256 start_timestamp,
+        uint256 duration,
+        address token
+    ) external onlyOwner {
+        require(id < shares.length, "id not exist");
+        Share storage sh = shares[id];
+        require(block.timestamp < sh.start_timestamp, "Share already started, could not be updated");
+        require(start_timestamp > block.timestamp, "require future date");
+        sh.amount = amount;
+        sh.start_timestamp = start_timestamp;
+        sh.duration = duration;
+        sh.token_to_share = token;
+        emit UpdatedShare(id, amount, start_timestamp, duration, token);
     }
 
     function subscribeShare(uint256 id, uint256[] memory championsIDs)
@@ -96,19 +128,25 @@ contract RevShare is Ownable {
         );
         require(share.claimed[msg.sender] == false, "already claimed");
         share.claimed[msg.sender] = true;
-        uint256 amountPerClaim = share.amount / share.total_claims;
-        uint256 totalAmountClaim = amountPerClaim * share.claims[msg.sender];
-        BITTOKEN.safeTransfer(msg.sender, totalAmountClaim);
-        emit ShareClaimed(msg.sender, totalAmountClaim, block.timestamp);
+        uint256 amount_per_claim = share.amount / share.total_claims;
+        uint256 total_amount_claim = amount_per_claim * share.claims[msg.sender];   
+        IERC20(share.token_to_share).safeTransfer(msg.sender, total_amount_claim);
+        share.amount_claimed = share.amount_claimed + total_amount_claim;
+        emit ShareClaimed(msg.sender, total_amount_claim, block.timestamp, share.token_to_share);
     }
 
     // Owner can withdraw tokens transferred to contract
-    function withdrawToken() external onlyOwner {
-        BITTOKEN.safeTransfer(owner(), BITTOKEN.balanceOf(address(this)));
+    function withdrawToken(address token) external onlyOwner {
+        IERC20(token).safeTransfer(owner(), IERC20(token).balanceOf(address(this)));
     }
 
     function getClaimsOf(uint256 id) external view returns (uint256){
          Share storage share = shares[id];
          return share.claims[msg.sender];
     }
+
+    function getLastShare() external view returns (uint256){
+        return shares.length;
+    }
+
 }
