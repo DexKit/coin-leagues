@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IChampions.sol";
 
 contract BattleNFTFactory is Ownable {
+    enum GameType {
+        Winner,
+        Loser
+    }
 
     IChampions internal immutable CHAMPIONS =
         IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
@@ -47,6 +51,7 @@ contract BattleNFTFactory is Ownable {
        uint256 duration;
        uint256 start_timestamp;
        address winner;
+       GameType game_type;
     }
 
     Game[] public allGames;
@@ -55,7 +60,7 @@ contract BattleNFTFactory is Ownable {
      * Create battle and join at same time
      *
      */
-    function createAndJoinGame(uint256 champion_id, uint256 bitt_feed, int256 multiplier, uint256 start_timestamp, uint256 duration, uint256 entry) external payable{
+    function createAndJoinGame(uint256 champion_id, uint256 bitt_feed, int256 multiplier, uint256 start_timestamp, uint256 duration, uint256 entry, GameType _game_type) external payable{
         require(entry == msg.value, "Sent exact value");
         require(start_timestamp > block.timestamp, "require future date");
         require(CHAMPIONS.ownerOf(champion_id) == msg.sender, "You need to own this champion" );
@@ -64,7 +69,7 @@ contract BattleNFTFactory is Ownable {
         uint256 id = allGames.length;
          // Bittoken can impersonate other coins
         if( rarity == 0){
-            require(bitt_feed > 0 && bitt_feed < 9, "feed not supported");
+            require(bitt_feed > 0 && bitt_feed < 8, "feed not supported");
             coin_player1[id].coin_feed = getChampionsFeed()[bitt_feed];
         }else{
             coin_player1[id].coin_feed = getChampionsFeed()[rarity];
@@ -73,7 +78,7 @@ contract BattleNFTFactory is Ownable {
         coin_player1[id].multiplier = multiplier;
         
         allGames.push(
-            Game(id, false, false, false, false, false, entry, msg.sender, address(0), duration, start_timestamp, address(0))
+            Game(id, false, false, false, false, false, entry, msg.sender, address(0), duration, start_timestamp, address(0), _game_type)
         );
         emit CreatedGame(id, champion_id, msg.sender, block.timestamp);
 
@@ -125,6 +130,11 @@ contract BattleNFTFactory is Ownable {
         coin_player2[id].end_price =  getPriceFeed(coin_player2[id].coin_feed);
         coin_player1[id].score = (((coin_player1[id].end_price - coin_player1[id].start_price)) / coin_player1[id].end_price) * coin_player1[id].multiplier;
         coin_player2[id].score = (((coin_player2[id].end_price - coin_player2[id].start_price)) / coin_player2[id].end_price) * coin_player2[id].multiplier;
+        // If it is type loser we just negate the score;
+        if(game.game_type == GameType.Loser){
+            coin_player1[id].score = -coin_player1[id].score;
+            coin_player2[id].score = -coin_player2[id].score;
+        }
         uint256 champion1 = coin_player1[id].champion_id;
         uint256 champion2 = coin_player2[id].champion_id;
         coin_player1[id].champion_score = coin_player1[id].score + int256(CHAMPIONS.getAttackOf(champion1)) + int256(CHAMPIONS.getRunOf(champion1)) + int256(CHAMPIONS.getAttackOf(champion1));
@@ -160,6 +170,20 @@ contract BattleNFTFactory is Ownable {
         emit Claimed(id,  amountWinner, game.winner, block.timestamp );
     }
 
+    function abortGameAndWithraw(uint256 id) external{
+         require(id < allGames.length);
+         Game storage game = allGames[id];
+         require(game.started == false, "Game  already started");
+         require(game.aborted == false, "Game  already aborted");
+         require(game.player2 == address(0), "Game  is already full");
+         game.aborted = true;
+         emit Aborted(id, block.timestamp);
+         game.withdrawed = true;
+         (bool sent, ) = game.player1.call{value: game.entry}("");
+         require(sent, "Failed to send Ether");
+         emit Withdrawed(id, block.timestamp);
+    }
+
     function abortGame(uint256 id) external{
          require(id < allGames.length);
          Game storage game = allGames[id];
@@ -168,11 +192,10 @@ contract BattleNFTFactory is Ownable {
          require(game.player2 == address(0), "Game  is already full");
          game.aborted = true;
          emit Aborted(id, block.timestamp);
+
     }
 
-
-
-    function withdraw(uint256 id) external{
+    function withdraw(uint256 id) internal{
         Game storage game = allGames[id];
         require(game.aborted == true, "Game  not aborted");
         require(game.withdrawed == false, "Game already withdrawed");

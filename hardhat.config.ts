@@ -62,7 +62,7 @@ export default {
     },*/
     hardhat: {
       forking: {
-        url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_POLYGON_API}`,
+        url: `https://polygon-rpc.com/`,
         blockNumber: 23260291,
       },
       accounts: {
@@ -101,6 +101,6 @@ export default {
     timeout: 2000000,
   },
   paths:{
-    sources: "./contracts/revShare",
+    sources: "./contracts/battle",
   }
 };
