@@ -66,10 +66,9 @@ export default {
         blockNumber: 23260291,
       },
       accounts: {
-        count: 100
-      }
+        count: 100,
+      },
     },
-
 
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
@@ -89,7 +88,7 @@ export default {
       url: `https://polygon-rpc.com/`,
       accounts: {
         mnemonic: MENMONIC,
-        count: 50
+        count: 50,
       },
       gasPrice: 60000000000,
     },
@@ -100,7 +99,7 @@ export default {
   mocha: {
     timeout: 2000000,
   },
-  paths:{
-    sources: "./contracts/battle",
-  }
+  /*paths: {
+    sources: "./contracts/v2",
+  },*/
 };

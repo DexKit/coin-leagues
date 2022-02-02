@@ -27,9 +27,9 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          // ALPACA / USD
          _chainlink_feeds[0xe0073b60833249ffd1bb2af809112c2fbf221DF6] = true;
          // AMZN / USD
-         _chainlink_feeds[0x51d08ca89d3e8c12535BA8AEd33cDf2557ab5b2a] = true;
+        // _chainlink_feeds[0x51d08ca89d3e8c12535BA8AEd33cDf2557ab5b2a] = true;
          // ARKK / USD
-         _chainlink_feeds[0x234c7a1da64Bdf44E1B8A25C94af53ff2A199dE0] = true;
+        // _chainlink_feeds[0x234c7a1da64Bdf44E1B8A25C94af53ff2A199dE0] = true;
          // ATOM / USD
          _chainlink_feeds[0xb056B7C804297279A9a673289264c17E6Dc6055d] = true;
          // AUTO / USD
@@ -43,37 +43,37 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          // BCH / USD
          _chainlink_feeds[0x43d80f616DAf0b0B42a928EeD32147dC59027D41] = true;
          // BETH / USD
-         _chainlink_feeds[0x2A3796273d47c4eD363b361D3AEFb7F7E2A13782] = true;
+      //   _chainlink_feeds[0x2A3796273d47c4eD363b361D3AEFb7F7E2A13782] = true;
          // BIDU / USD
-         _chainlink_feeds[0xb9344e4Ffa6d5885B2C5830adc27ddF3FdBF883c] = true;
+        // _chainlink_feeds[0xb9344e4Ffa6d5885B2C5830adc27ddF3FdBF883c] = true;
          // BIFI / USD
          _chainlink_feeds[0xaB827b69daCd586A37E80A7d552a4395d576e645] = true;
          // BNB / USD
          _chainlink_feeds[0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE] = true;
          // BRK.B / USD
-         _chainlink_feeds[0x5289A08b6d5D2f8fAd4cC169c65177f68C0f0A99] = true;
+        // _chainlink_feeds[0x5289A08b6d5D2f8fAd4cC169c65177f68C0f0A99] = true;
          // BTC / USD
          _chainlink_feeds[0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf] = true;
         // BUSD / USD
-         _chainlink_feeds[0xcBb98864Ef56E9042e7d2efef76141f15731B82f] = true;
+        // _chainlink_feeds[0xcBb98864Ef56E9042e7d2efef76141f15731B82f] = true;
          // BZRX / USD
-         _chainlink_feeds[0xFc362828930519f236ad0c8f126B7996562a695A] = true;
+        // _chainlink_feeds[0xFc362828930519f236ad0c8f126B7996562a695A] = true;
          // CAKE / USD
          _chainlink_feeds[0xB6064eD41d4f67e353768aA239cA86f4F73665a1] = true;
          // CFX / USD
          _chainlink_feeds[0xe3cA2f3Bad1D8327820f648C759f17162b5383ae] = true;
          // CHF / USD
-         _chainlink_feeds[0x964261740356cB4aaD0C3D2003Ce808A4176a46d] = true;
+        // _chainlink_feeds[0x964261740356cB4aaD0C3D2003Ce808A4176a46d] = true;
          // CHR / USD
          _chainlink_feeds[0x1f771B2b1F3c3Db6C7A1d5F38961a49CEcD116dA] = true;
          // COIN / USD
-         _chainlink_feeds[0x2d1AB79D059e21aE519d88F978cAF39d74E31AEB] = true;
+        // _chainlink_feeds[0x2d1AB79D059e21aE519d88F978cAF39d74E31AEB] = true;
          // COMP / USD
          _chainlink_feeds[0x0Db8945f9aEf5651fa5bd52314C5aAe78DfDe540] = true;
          // CREAM / USD
          _chainlink_feeds[0xa12Fc27A873cf114e6D8bBAf8BD9b8AC56110b39] = true;
          // DAI / USD
-         _chainlink_feeds[0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA] = true;
+      //   _chainlink_feeds[0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA] = true;
          // DEGO / USD
          _chainlink_feeds[0x39F1275366D130eB677D4F47D40F9296B62D877A] = true;
          // DF / USD
@@ -91,7 +91,7 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
           // ETH / USD
          _chainlink_feeds[0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e] = true;
           // EUR / USD
-         _chainlink_feeds[0x0bf79F617988C472DcA68ff41eFe1338955b9A80] = true;
+         // _chainlink_feeds[0x0bf79F617988C472DcA68ff41eFe1338955b9A80] = true;
           // FB / USD
          _chainlink_feeds[0xfc76E9445952A3C31369dFd26edfdfb9713DF5Bb] = true;
           // FET / USD
@@ -99,17 +99,17 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
           // FIL / USD
          _chainlink_feeds[0xE5dbFD9003bFf9dF5feB2f4F445Ca00fb121fb83] = true;
           // GBP / USD
-         _chainlink_feeds[0x8FAf16F710003E538189334541F5D4a391Da46a0] = true;
+      //   _chainlink_feeds[0x8FAf16F710003E538189334541F5D4a391Da46a0] = true;
           // GME / USD
-         _chainlink_feeds[0x66cD2975d02f5F5cdEF2E05cBca12549B1a5022D] = true;
+        // _chainlink_feeds[0x66cD2975d02f5F5cdEF2E05cBca12549B1a5022D] = true;
           // GOOGL / USD
-         _chainlink_feeds[0xeDA73F8acb669274B15A977Cb0cdA57a84F18c2a] = true;
+         // _chainlink_feeds[0xeDA73F8acb669274B15A977Cb0cdA57a84F18c2a] = true;
           // ICP / USD
          _chainlink_feeds[0x84210d9013A30C6ab169e28840A6CC54B60fa042] = true;
           // INJ / USD
          _chainlink_feeds[0x63A9133cd7c611d6049761038C16f238FddA71d7] = true;
           // JPM / USD
-         _chainlink_feeds[0x8f26ba94180371baA2D2C143f96b6886DCACA250] = true;
+       //  _chainlink_feeds[0x8f26ba94180371baA2D2C143f96b6886DCACA250] = true;
           // LINA / USD
          _chainlink_feeds[0x38393201952f2764E04B290af9df427217D56B41] = true;
           // LINK / USD
@@ -129,27 +129,27 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          // MRNA / USD 
          _chainlink_feeds[0x6101F4DFBb24Cac3D64e28A815255B428b93639f] = true;
          // MS / USD
-         _chainlink_feeds[0x6b25F7f189c3f26d3caC43b754578b67Fc8d952A] = true;
+       //  _chainlink_feeds[0x6b25F7f189c3f26d3caC43b754578b67Fc8d952A] = true;
          // MSFT / USD
-         _chainlink_feeds[0x5D209cE1fBABeAA8E6f9De4514A74FFB4b34560F] = true;
+        // _chainlink_feeds[0x5D209cE1fBABeAA8E6f9De4514A74FFB4b34560F] = true;
          // NFLX / USD
          _chainlink_feeds[0x1fE6c9Bd9B29e5810c2819f37dDa8559739ebeC9] = true;
          // NGN / USD
-         _chainlink_feeds[0x1FF2B48ed0A1669d6CcC83f4B3c84FDdF13Ea594] = true;
+       //  _chainlink_feeds[0x1FF2B48ed0A1669d6CcC83f4B3c84FDdF13Ea594] = true;
          // NULS / USD
          _chainlink_feeds[0xaCFBE73231d312AC6954496b3f786E892bF0f7e5] = true;
          // NVDA / USD
-         _chainlink_feeds[0xea5c2Cbb5cD57daC24E26180b19a929F3E9699B8] = true;
+       //  _chainlink_feeds[0xea5c2Cbb5cD57daC24E26180b19a929F3E9699B8] = true;
          // ONT / USD
          _chainlink_feeds[0x887f177CBED2cf555a64e7bF125E1825EB69dB82] = true;
          // PACB / USD
-         _chainlink_feeds[0xe9bEC24f14AB49b0a81a482a4224e7505d2d29e9] = true;
+      //   _chainlink_feeds[0xe9bEC24f14AB49b0a81a482a4224e7505d2d29e9] = true;
          // PAXG / USD
          _chainlink_feeds[0x7F8caD4690A38aC28BDA3D132eF83DB1C17557Df] = true;
          // PFE / USD
          _chainlink_feeds[0xe96fFdE2ba50E0e869520475ee1bC73cA2dEE326] = true;
          // QQQ / USD
-         _chainlink_feeds[0x9A41B56b2c24683E2f23BdE15c14BC7c4a58c3c4] = true;
+        // _chainlink_feeds[0x9A41B56b2c24683E2f23BdE15c14BC7c4a58c3c4] = true;
          // RAMP / USD
          _chainlink_feeds[0xD1225da5FC21d17CaE526ee4b6464787c6A71b4C] = true;
           // REEF / USD
@@ -169,11 +169,11 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
           // TRX / USD
          _chainlink_feeds[0xF4C5e535756D11994fCBB12Ba8adD0192D9b88be] = true;
           // TSLA / USD
-         _chainlink_feeds[0xEEA2ae9c074E87596A85ABE698B2Afebc9B57893] = true;
+        // _chainlink_feeds[0xEEA2ae9c074E87596A85ABE698B2Afebc9B57893] = true;
           // TSM / USD
          _chainlink_feeds[0x685fC5acB74CE3d5DF03543c9813C73DFCe50de8] = true;
           // TUSD / USD
-         _chainlink_feeds[0xa3334A9762090E827413A7495AfeCE76F41dFc06] = true;
+       //  _chainlink_feeds[0xa3334A9762090E827413A7495AfeCE76F41dFc06] = true;
           // UNH / USD
          _chainlink_feeds[0xC18c5A32c84CbbAc7D0F06Dd370198DA711c73C9] = true;
          // UNI / USD
@@ -204,6 +204,12 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
          _chainlink_feeds[0xC94580FAaF145B2FD0ab5215031833c98D3B77E4] = true;
          // ZIL / USD
          _chainlink_feeds[0x3e3aA4FC329529C8Ab921c810850626021dbA7e6] = true;
+         // ONG / USD
+         _chainlink_feeds[0xcF95796f3016801A1dA5C518Fc7A59C51dcEf793] = true;
+         // SHIB / USD  
+         _chainlink_feeds[0xA615Be6cb0f3F36A641858dB6F30B9242d0ABeD8] = true;
+         // XLM / USD
+         _chainlink_feeds[0x27Cc356A5891A3Fe6f84D0457dE4d108C6078888] = true;
              
 
         // Allowed Amounts
@@ -317,14 +323,14 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
         returns (int256[8] memory)
     {
         return [
-            int256(1700),
-            int256(1650),
-            int256(1600),
-            int256(1600),
-            int256(1550),
-            int256(1500),
-            int256(1400),
-            int256(1350)
+            int256(1000),
+            int256(1000),
+            int256(1000),
+            int256(1000),
+            int256(1000),
+            int256(1000),
+            int256(1000),
+            int256(1000)
         ];
     }
 }
