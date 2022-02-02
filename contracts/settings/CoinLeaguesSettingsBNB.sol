@@ -215,6 +215,9 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
         // Allowed Amounts
         _allowed_amounts[0.0001 ether] = true;
         _allowed_amounts[0.01 ether] = true;
+        _allowed_amounts[0.05 ether] = true;
+        _allowed_amounts[0.1 ether] = true;
+        _allowed_amounts[0.3 ether] = true;
         _allowed_amounts[1 ether] = true;
         _allowed_amounts[3 ether] = true;
         _allowed_amounts[5 ether] = true;
@@ -227,6 +230,8 @@ contract CoinLeagueSettingsBNB is ICoinLeagueSettings {
         _allowed_amount_players[3] = true;
         _allowed_amount_players[5] = true;
         _allowed_amount_players[10] = true;
+        _allowed_amount_players[25] = true;
+        _allowed_amount_players[50] = true;
         // Allowed Amount Coins
         _allowed_amount_coins[1] = true;
         _allowed_amount_coins[2] = true;

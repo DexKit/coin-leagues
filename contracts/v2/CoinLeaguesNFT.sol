@@ -76,9 +76,10 @@ contract CoinLeaguesV2NFT is Ownable {
         uint256 amount_to_play;
         uint256 total_amount_collected;
         address settings;
-        uint256 championRoom;
     }
     bool houseClaimed = false;
+    // Not created on game struct because of stack to deep
+    uint256 public championRoom;
 
     Player[] public players;
 
@@ -129,7 +130,7 @@ contract CoinLeaguesV2NFT is Ownable {
         game.num_coins = _num_coins;
         game.abort_timestamp = _abort_timestamp;
         game.start_timestamp = _start_timestamp;
-        game.championRoom = _championRoom;
+        championRoom = _championRoom;
         id = _id;
     }
 
@@ -162,9 +163,9 @@ contract CoinLeaguesV2NFT is Ownable {
                 "You need to own these champions"
             );
 
-             if (game.championRoom != 500000) {
+             if (championRoom != 500000) {
                 require(
-                    CHAMPIONS.getRarityOf(champion_id) == game.championRoom,
+                    CHAMPIONS.getRarityOf(champion_id) == championRoom,
                     "Champion Room not supported"
                 );
              }

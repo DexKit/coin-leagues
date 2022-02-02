@@ -99,7 +99,7 @@ export default {
   mocha: {
     timeout: 2000000,
   },
-  /*paths: {
-    sources: "./contracts/v2",
-  },*/
+  paths: {
+    sources: "./contracts/squid",
+  },
 };

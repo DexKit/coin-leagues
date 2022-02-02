@@ -5,23 +5,25 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
-* In progress
+ * In progress
  */
 contract SquidGame is Ownable {
-     enum GameType {
+    enum GameType {
         Winner,
         Loser
     }
     uint256 currentRound;
     uint256 startTimestamp;
     uint256 endTimestamp;
-    enum  ChallengeState{
+    enum ChallengeState {
         Setup,
         Started,
-        Finished
+        Finished,
+        Quit
     }
     ChallengeState gameState;
     bool[6] challengeResult;
+    address houseAddress = address(0);
 
     struct Coin {
         address feed;
@@ -31,7 +33,6 @@ contract SquidGame is Ownable {
         int256 end_price;
         int256 score;
         uint256 game_type;
-
     }
     mapping(uint256 => Coin) public CoinRound;
 
@@ -39,18 +40,22 @@ contract SquidGame is Ownable {
 
     mapping(uint256 => mapping(address => bool)) public PlayersPlay;
     mapping(uint256 => address[]) public PlayersRound;
+    mapping(uint256 => address[]) public PlayersVote;
+    mapping(uint256 => mapping(address => bool)) public PlayersVoteMap;
     mapping(uint256 => mapping(address => bool)) public PlayersRoundMap;
     uint256 public pot = 1 ether;
     uint256 lastChallengeTimestamp;
-    constructor(uint256 _startTimestamp, uint _pot){
+
+    constructor(uint256 _startTimestamp, uint256 _pot) {
         currentRound = 0;
         startTimestamp = _startTimestamp;
         pot = _pot;
     }
+
     /**
-    * Join Game at initial round
-    */
-    function joinGame(bool play) external payable{
+     * Join Game at initial round
+     */
+    function joinGame(bool play) external payable {
         require(msg.value == pot, "Need to sent exact amount of pot");
         require(PlayersRoundMap[0][msg.sender] == false, "Already joined");
         PlayersRound[0].push(msg.sender);
@@ -62,77 +67,185 @@ contract SquidGame is Ownable {
      *  Go to Next Challenge
      */
     function goNextChallenge(bool play) external {
-        require(PlayersPlay[currentRound][msg.sender] == challengeResult[currentRound], "you not passed challenge");
-        require(gameState == ChallengeState.Finished, "Challenge still not finished");
-        PlayersRound[currentRound + 1].push(msg.sender);
-        PlayersRoundMap[currentRound + 1][msg.sender] = true;
-        PlayersPlay[currentRound + 1][msg.sender] = play;
-      
+        require(
+            PlayersRoundMap[0][msg.sender] == true,
+            "you need join game to be able to go next challenges"
+        );
+        require(
+            PlayersRoundMap[currentRound - 1][msg.sender] == true,
+            "you need to been on previous round"
+        );
+        require(
+            PlayersPlay[currentRound - 1][msg.sender] ==
+                challengeResult[currentRound - 1],
+            "you not passed challenge"
+        );
+        require(
+            gameState == ChallengeState.Finished,
+            "Challenge still not finished"
+        );
+        require(currentRound + 1 < 7, "There is only 6 rounds");
+        PlayersRound[currentRound].push(msg.sender);
+        PlayersRoundMap[currentRound][msg.sender] = true;
+        PlayersPlay[currentRound][msg.sender] = play;
     }
 
-    /**
-     *  Enter current round
-     */
-   // function enterCurrentRound(bool play) external {
-      //  require(block.timestamp > startTimestamp, "Not started yet");
-      // require(block.timestamp < endTimestamp,   "Challenge finished");
-     //   require(lastChallengeTimestamp + 24*3600 < block.timestamp, "Challenge needs at least to pass 24 hours to go next round");
-     //   require(PlayersRoundMap[currentRound + 1][msg.sender] == true, "You not passed on this round");
-     //   PlayersPlay[currentRound][msg.sender] = play;
-   // }
-    // We setup first the challenge to start in few hours
+    // We setup first the challenge to start in few a hour
     function setupChallenge() external {
-            require(block.timestamp > lastChallengeTimestamp + 24*3600, "Challenge needs at least to pass 24 hours to go next round");
-            uint256 gameType = _random(0) % 1;
-            uint256 feed = _random(1) % 8;         
-            CoinRound[currentRound] = Coin(getFeeds()[feed], 0, 0, 0, 0 ,0, gameType);
-            CoinRound[currentRound].start_timestamp = block.timestamp + 3600;
-            //we do rounds of one hour
-            CoinRound[currentRound].duration = 3600;
+        require(block.timestamp > startTimestamp, "Tournament not started");
+        require(
+            block.timestamp > lastChallengeTimestamp + 24 * 3600,
+            "Challenge needs at least to pass 24 hours to go next round"
+        );
+        require(gameState != ChallengeState.Started, "challenge started");
+        require(
+            gameState != ChallengeState.Setup,
+            "challenge was already setup"
+        );
+        uint256 gameType = _random(0) % 1;
+        uint256 feed = _random(1) % 8;
+        CoinRound[currentRound] = Coin(
+            getFeeds()[feed],
+            0,
+            0,
+            0,
+            0,
+            0,
+            gameType
+        );
+        CoinRound[currentRound].start_timestamp = block.timestamp + 3600;
+        //we do rounds of one hour
+        CoinRound[currentRound].duration = 3600;
+        gameState = ChallengeState.Setup;
     }
+
     // The challenge starts
     function startChallenge() external {
-            require(block.timestamp >  CoinRound[currentRound].start_timestamp , "Challenge needs at least to pass 24 hours to start next round");
-            CoinRound[currentRound].start_price = getPriceFeed(CoinRound[currentRound].feed);
-            gameState = ChallengeState.Started;
-
+        require(
+            block.timestamp > CoinRound[currentRound].start_timestamp,
+            "Challenge not started"
+        );
+        require(gameState != ChallengeState.Started, "Already started");
+        require(gameState != ChallengeState.Quit, "Game was finished");
+        CoinRound[currentRound].start_price = getPriceFeed(
+            CoinRound[currentRound].feed
+        );
+        gameState = ChallengeState.Started;
     }
 
-    function endChallenge() external {       
-          require(block.timestamp > CoinRound[currentRound].start_timestamp + CoinRound[currentRound].duration, "Need at least one hour to finish"  );
-          CoinRound[currentRound].end_price = getPriceFeed(CoinRound[currentRound].feed);
-          CoinRound[currentRound].score = (((CoinRound[currentRound].end_price - CoinRound[currentRound].start_price)* 100000   ) / CoinRound[currentRound].end_price );
-          if(CoinRound[currentRound].score > 0 && CoinRound[currentRound].game_type == 0){
-              challengeResult[currentRound] = true;
-          }else{
-              challengeResult[currentRound] = false;
-          }
-          currentRound = currentRound +1;
-          lastChallengeTimestamp = block.timestamp;
-          gameState = ChallengeState.Finished;
+    function finishChallenge() external {
+        require(
+            block.timestamp >
+                CoinRound[currentRound].start_timestamp +
+                    CoinRound[currentRound].duration,
+            "Duration not elapsed yet"
+        );
+        require(gameState != ChallengeState.Finished, "Game already finished");
+        CoinRound[currentRound].end_price = getPriceFeed(
+            CoinRound[currentRound].feed
+        );
+        CoinRound[currentRound].score = (((CoinRound[currentRound].end_price -
+            CoinRound[currentRound].start_price) * 100000) /
+            CoinRound[currentRound].end_price);
+        // If it is bull score needs to be positive
+        if (CoinRound[currentRound].game_type == 0) {
+            if (CoinRound[currentRound].score > 0) {
+                challengeResult[currentRound] = true;
+            } else {
+                challengeResult[currentRound] = false;
+            }
+        }
+        // If it is bear score needs to be negative
+        if (CoinRound[currentRound].game_type == 1) {
+            if (CoinRound[currentRound].score > 0) {
+                challengeResult[currentRound] = false;
+            } else {
+                challengeResult[currentRound] = true;
+            }
+        }
+        currentRound = currentRound + 1;
+        lastChallengeTimestamp = block.timestamp;
+        gameState = ChallengeState.Finished;
     }
 
+    function voteEndGame() external {
+        require(
+            PlayersVoteMap[currentRound][msg.sender] == false,
+            "You already voted on this round"
+        );
+        require(
+            gameState == ChallengeState.Finished,
+            "Challenge needs to be finished to vote"
+        );
+        PlayersVote[currentRound].push(msg.sender);
+        PlayersVoteMap[currentRound][msg.sender] = true;
+    }
+
+    // If majority of players voted to quit the game, game just quit
+    function computeEndGame() external {
+        require(
+            gameState == ChallengeState.Setup,
+            "Only on Setup State we can end the challenge"
+        );
+        if (
+            2 * PlayersVote[currentRound].length >
+            PlayersRound[currentRound].length
+        ) {
+            gameState = ChallengeState.Quit;
+        }
+    }
 
     /**
-    * Total pot depends on eleminated players
+     * Total pot depends on joined players
      */
-    function getTotalPot() external view returns(uint256){
-        if(currentRound > 0){
-            return (PlayersRound[0].length - PlayersRound[currentRound].length)*pot;
-        }else{
+    function getTotalPot() public view returns (uint256) {
+        if (currentRound > 0) {
+            return (PlayersRound[0].length) * pot;
+        } else {
             return 0;
         }
     }
-    function getCurrentPlayers() external view returns(uint256){
+
+    function getCurrentPlayers() external view returns (uint256) {
         return PlayersRound[currentRound].length;
     }
 
-    function getCurrentPlayersAtRound(uint256 round) external view returns(uint256){
-        require(round < currentRound, "round can not be higher than current one");
-        return PlayersRound[round].length;
+    function withdraw() external {
+        require(
+            currentRound == 6 || gameState == ChallengeState.Quit,
+            "Game not finished yet"
+        );
+        uint256 totalPotMinusHouse = getTotalPot() - (getTotalPot() * 10) / 100;
+        uint256 currentPlayers = PlayersRound[currentRound].length;
+
+        (bool sent, ) = msg.sender.call{
+            value: totalPotMinusHouse / currentPlayers
+        }("");
+        require(sent, "Failed to send Ether");
     }
 
-    
+    function withdrawHouse() external {
+        require(
+            currentRound == 6 || gameState == ChallengeState.Quit,
+            "Game not finished yet"
+        );
+        uint256 totalPotHouse = (getTotalPot() * 10) / 100;
+
+        (bool sent, ) = houseAddress.call{value: totalPotHouse}("");
+        require(sent, "Failed to send Ether");
+    }
+
+    function getCurrentPlayersAtRound(uint256 round)
+        external
+        view
+        returns (uint256)
+    {
+        require(
+            round < currentRound,
+            "round can not be higher than current one"
+        );
+        return PlayersRound[round].length;
+    }
 
     function getPriceFeed(address coin_feed) public view returns (int256) {
         (, int256 price, , , ) = AggregatorV3Interface(coin_feed)
@@ -140,19 +253,20 @@ contract SquidGame is Ownable {
         return price;
     }
 
-     // We generate a pseudo random number, just for fun
-    function _random(uint256 tokenId) private view returns (uint) {   
-        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, tokenId)));   
+    // We generate a pseudo random number, just for fun
+    function _random(uint256 tokenId) private view returns (uint256) {
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(block.difficulty, block.timestamp, tokenId)
+                )
+            );
     }
 
-     /**
+    /**
      * returns feed associated with coin
      */
-    function getFeeds()
-        internal
-        pure
-        returns (address[7] memory)
-    {
+    function getFeeds() internal pure returns (address[7] memory) {
         return [
             // BTC
             0xc907E116054Ad103354f2D350FD2514433D57F6f,
@@ -170,6 +284,4 @@ contract SquidGame is Ownable {
             0xbaf9327b6564454F4a3364C33eFeEf032b4b4444
         ];
     }
-
-
 }
