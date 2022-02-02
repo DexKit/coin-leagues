@@ -8,7 +8,7 @@
   },
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
-    "test": "npx hardhat  test test/computeScores.test.ts",
+    "test": "npx hardhat  test test/battle.test.ts",
     "test:factory": "npx hardhat  test test/factory-v3.test.ts",
     "compile": "npx hardhat  compile",
     "script:whitelist": "npx hardhat run scripts/whitelist-address.ts --network matic",
