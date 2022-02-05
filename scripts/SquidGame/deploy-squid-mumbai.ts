@@ -20,11 +20,8 @@ async function main() {
   await settings.deployed();
   console.log("Settings deployed to:", settings.address);*/
   // We get the contract to deploy
-  const Factory = await hre.ethers.getContractFactory("CoinLeaguesFactoryV2");
-  const factory = await Factory.deploy(
-    "0x4452D5719304D18D99742DA14803a0735e079D31",
-    owner.address
-  );
+  const Factory = await hre.ethers.getContractFactory("SquidGameFactoryMumbai");
+  const factory = await Factory.deploy();
 
   await factory.deployed();
 
