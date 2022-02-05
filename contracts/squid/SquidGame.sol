@@ -16,6 +16,7 @@ contract SquidGame is Ownable {
     uint256 startTimestamp;
     uint256 endTimestamp;
     enum ChallengeState {
+        Joining,
         Setup,
         Started,
         Finished,
@@ -24,7 +25,43 @@ contract SquidGame is Ownable {
     ChallengeState gameState;
     bool[6] challengeResult;
     address houseAddress = address(0);
+    event PlayerJoinedRound(
+        uint256 round,
+        address player,
+        uint256 created_at,
+        bool play
+    );
+    event PlayerJoined(address player, uint256 created_at);
+    event ChallengeSetup(
+        uint256 round,
+        address feed,
+        uint256 created_at,
+        uint256 game_type
+    );
+    event ChallengeStarted(
+        uint256 round,
+        int256 start_price,
+        uint256 created_at
+    );
+    event ChallengeFinished(
+        uint256 round,
+        int256 end_price,
+        uint256 created_at,
+        bool result
+    );
 
+    event VoteToQuit(uint256 round, address player, uint256 created_at);
+
+    event GameQuitted(
+        uint256 round,
+        uint256 amount_voted,
+        uint256 amount_total,
+        uint256 created_at
+    );
+
+    event Withdrawed(uint256 amount, address player, uint256 created_at);
+
+    event WithdrawedHouse(uint256 amount, uint256 created_at);
     struct Coin {
         address feed;
         int256 start_price;
@@ -39,10 +76,12 @@ contract SquidGame is Ownable {
     Coin public coin;
 
     mapping(uint256 => mapping(address => bool)) public PlayersPlay;
+    address[] public PlayersJoined;
     mapping(uint256 => address[]) public PlayersRound;
     mapping(uint256 => address[]) public PlayersVote;
     mapping(uint256 => mapping(address => bool)) public PlayersVoteMap;
     mapping(uint256 => mapping(address => bool)) public PlayersRoundMap;
+    mapping(address => bool) public PlayersJoinedMap;
     uint256 public pot = 1 ether;
     uint256 lastChallengeTimestamp;
 
@@ -50,47 +89,48 @@ contract SquidGame is Ownable {
         currentRound = 0;
         startTimestamp = _startTimestamp;
         pot = _pot;
+        gameState = ChallengeState.Joining;
     }
 
-    /**
-     * Join Game at initial round
-     */
-    function joinGame(bool play) external payable {
+    function joinGame() external payable {
         require(msg.value == pot, "Need to sent exact amount of pot");
-        require(PlayersRoundMap[0][msg.sender] == false, "Already joined");
-        PlayersRound[0].push(msg.sender);
-        PlayersRoundMap[0][msg.sender] = true;
-        PlayersPlay[0][msg.sender] = play;
+        require(PlayersJoinedMap[msg.sender] == false, "Already joined");
+        PlayersJoinedMap[msg.sender] = true;
+        PlayersJoined.push(msg.sender);
+        emit PlayerJoined(msg.sender, block.timestamp);
     }
 
     /**
      *  Go to Next Challenge
      */
-    function goNextChallenge(bool play) external {
+    function playChallenge(bool play) external {
         require(
-            PlayersRoundMap[0][msg.sender] == true,
+            PlayersJoinedMap[msg.sender] == true,
             "you need join game to be able to go next challenges"
         );
+        if (currentRound > 0) {
+            require(
+                PlayersRoundMap[currentRound - 1][msg.sender] == true,
+                "you need to been on previous round"
+            );
+            require(
+                PlayersPlay[currentRound - 1][msg.sender] ==
+                    challengeResult[currentRound - 1],
+                "you not passed challenge"
+            );
+        }
         require(
-            PlayersRoundMap[currentRound - 1][msg.sender] == true,
-            "you need to been on previous round"
-        );
-        require(
-            PlayersPlay[currentRound - 1][msg.sender] ==
-                challengeResult[currentRound - 1],
-            "you not passed challenge"
-        );
-        require(
-            gameState == ChallengeState.Finished,
-            "Challenge still not finished"
+            gameState == ChallengeState.Setup,
+            "Challenge needs to be setup phase"
         );
         require(currentRound + 1 < 7, "There is only 6 rounds");
         PlayersRound[currentRound].push(msg.sender);
         PlayersRoundMap[currentRound][msg.sender] = true;
         PlayersPlay[currentRound][msg.sender] = play;
+        emit PlayerJoinedRound(0, msg.sender, block.timestamp, play);
     }
 
-    // We setup first the challenge to start in few a hour
+    // We setup first the challenge to start in few hours
     function setupChallenge() external {
         require(block.timestamp > startTimestamp, "Tournament not started");
         require(
@@ -117,6 +157,12 @@ contract SquidGame is Ownable {
         //we do rounds of one hour
         CoinRound[currentRound].duration = 3600;
         gameState = ChallengeState.Setup;
+        emit ChallengeSetup(
+            currentRound,
+            getFeeds()[feed],
+            block.timestamp,
+            gameType
+        );
     }
 
     // The challenge starts
@@ -131,6 +177,11 @@ contract SquidGame is Ownable {
             CoinRound[currentRound].feed
         );
         gameState = ChallengeState.Started;
+        emit ChallengeStarted(
+            currentRound,
+            CoinRound[currentRound].start_price,
+            block.timestamp
+        );
     }
 
     function finishChallenge() external {
@@ -166,6 +217,12 @@ contract SquidGame is Ownable {
         currentRound = currentRound + 1;
         lastChallengeTimestamp = block.timestamp;
         gameState = ChallengeState.Finished;
+        emit ChallengeFinished(
+            currentRound - 1,
+            CoinRound[currentRound - 1].end_price,
+            block.timestamp,
+            challengeResult[currentRound - 1]
+        );
     }
 
     function voteEndGame() external {
@@ -179,6 +236,7 @@ contract SquidGame is Ownable {
         );
         PlayersVote[currentRound].push(msg.sender);
         PlayersVoteMap[currentRound][msg.sender] = true;
+        emit VoteToQuit(currentRound, msg.sender, block.timestamp);
     }
 
     // If majority of players voted to quit the game, game just quit
@@ -192,6 +250,12 @@ contract SquidGame is Ownable {
             PlayersRound[currentRound].length
         ) {
             gameState = ChallengeState.Quit;
+            emit GameQuitted(
+                currentRound,
+                PlayersVote[currentRound].length,
+                PlayersRound[currentRound].length,
+                block.timestamp
+            );
         }
     }
 
@@ -200,7 +264,7 @@ contract SquidGame is Ownable {
      */
     function getTotalPot() public view returns (uint256) {
         if (currentRound > 0) {
-            return (PlayersRound[0].length) * pot;
+            return (PlayersJoined.length) * pot;
         } else {
             return 0;
         }
@@ -210,6 +274,22 @@ contract SquidGame is Ownable {
         return PlayersRound[currentRound].length;
     }
 
+    function getJoinedPlayers() external view returns (uint256) {
+        return PlayersJoined.length;
+    }
+
+    function getCurrentRound() external view returns (uint256) {
+        return currentRound;
+    }
+
+    function getPlayerCurrentChallengeResultAtRound(
+        address player,
+        uint256 round
+    ) external view returns (bool) {
+        require(round <= currentRound, "round is higher than current round");
+        return PlayersPlay[round][player] == challengeResult[round];
+    }
+
     function withdraw() external {
         require(
             currentRound == 6 || gameState == ChallengeState.Quit,
@@ -217,11 +297,11 @@ contract SquidGame is Ownable {
         );
         uint256 totalPotMinusHouse = getTotalPot() - (getTotalPot() * 10) / 100;
         uint256 currentPlayers = PlayersRound[currentRound].length;
+        uint256 amountToSend = totalPotMinusHouse / currentPlayers;
 
-        (bool sent, ) = msg.sender.call{
-            value: totalPotMinusHouse / currentPlayers
-        }("");
+        (bool sent, ) = msg.sender.call{value: amountToSend}("");
         require(sent, "Failed to send Ether");
+        emit Withdrawed(amountToSend, msg.sender, block.timestamp);
     }
 
     function withdrawHouse() external {
@@ -233,6 +313,7 @@ contract SquidGame is Ownable {
 
         (bool sent, ) = houseAddress.call{value: totalPotHouse}("");
         require(sent, "Failed to send Ether");
+        emit WithdrawedHouse(totalPotHouse, block.timestamp);
     }
 
     function getCurrentPlayersAtRound(uint256 round)
