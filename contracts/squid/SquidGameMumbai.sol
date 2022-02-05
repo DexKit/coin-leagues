@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /**
  * In progress
  */
-contract SquidGame is Ownable {
+contract SquidGameMumbai is Ownable {
     enum GameType {
         Winner,
         Loser
@@ -145,7 +145,7 @@ contract SquidGame is Ownable {
             "challenge was already setup"
         );
         uint256 gameType = _random(0) % 1;
-        uint256 feed = _random(1) % 8;
+        uint256 feed = _random(1) % 4;
         CoinRound[currentRound] = Coin(
             getFeeds()[feed],
             0,
@@ -355,22 +355,14 @@ contract SquidGame is Ownable {
     /**
      * returns feed associated with coin
      */
-    function getFeeds() internal pure returns (address[7] memory) {
+    function getFeeds() internal pure returns (address[3] memory) {
         return [
             // BTC
-            0xc907E116054Ad103354f2D350FD2514433D57F6f,
+            0x007A22900a3B98143368Bd5906f8E17e9867581b,
             // ETH
-            0xF9680D99D6C9589e2a93a78A04A279e509205945,
-            // DOT
-            0xacb51F1a83922632ca02B25a8164c10748001BdE,
-            // LINK,
-            0xd9FFdb71EbE7496cC440152d43986Aae0AB76665,
-            // UNI
-            0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C,
-            //ADA
-            0x882554df528115a743c4537828DA8D5B58e52544,
-            // DOGE
-            0xbaf9327b6564454F4a3364C33eFeEf032b4b4444
+            0x007A22900a3B98143368Bd5906f8E17e9867581b,
+            // MATIC
+            0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
         ];
     }
 }

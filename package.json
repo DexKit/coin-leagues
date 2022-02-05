@@ -1,6 +1,6 @@
 {
   "name": "coins-league",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "index.ts",
   "repository": "https://github.com/DexKit/coins-league.git",
   "engines": {
@@ -22,7 +22,10 @@
     "deploy:room:polygon": "npx hardhat run scripts/deploy-room-factory-matic.ts --network matic",
     "deploy-roles:polygon": "npx hardhat run scripts/deploy-factory-matic-roles.ts --network matic",
     "fill-game:polygon": "npx hardhat run scripts/fill-game-v2.ts --network polygon",
-    "buy-kit:polygon": "npx hardhat run scripts/buy-kit.ts --network polygon"
+    "buy-kit:polygon": "npx hardhat run scripts/buy-kit.ts --network polygon",
+    "deploy-nft-league:mumbai": "npx hardhat run scripts/NFTLeague/deploy-nft-league-mumbai.ts --network mumbai",
+    "deploy-squid:mumbai": "npx hardhat run scripts/SquidGame/deploy-squid-mumbai.ts --network mumbai",
+    "owner:mumbai": "npx hardhat run scripts/owner.ts --network mumbai"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
