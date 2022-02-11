@@ -13,8 +13,8 @@ contract SquidGame is Ownable {
         Loser
     }
     uint256 currentRound;
-    uint256 startTimestamp;
-    uint256 endTimestamp;
+    uint256 public startTimestamp;
+    uint256 public endTimestamp;
     enum ChallengeState {
         Joining,
         Setup,
@@ -23,7 +23,7 @@ contract SquidGame is Ownable {
         Quit
     }
     ChallengeState gameState;
-    bool[6] challengeResult;
+    bool[6] public challengeResult;
     address houseAddress = address(0);
     event PlayerJoinedRound(
         uint256 round,
@@ -125,11 +125,11 @@ contract SquidGame is Ownable {
             gameState == ChallengeState.Setup,
             "Challenge needs to be setup phase"
         );
-        require(currentRound + 1 < 7, "There is only 6 rounds");
+        require(currentRound < 6, "There is only 6 rounds");
         PlayersRound[currentRound].push(msg.sender);
         PlayersRoundMap[currentRound][msg.sender] = true;
         PlayersPlay[currentRound][msg.sender] = play;
-        emit PlayerJoinedRound(0, msg.sender, block.timestamp, play);
+        emit PlayerJoinedRound(currentRound, msg.sender, block.timestamp, play);
     }
 
     // We setup first the challenge to start in few hours
@@ -144,6 +144,7 @@ contract SquidGame is Ownable {
             gameState != ChallengeState.Setup,
             "challenge was already setup"
         );
+        require(currentRound < 6, "No more challenges");
         uint256 gameType = _random(0) % 1;
         uint256 feed = _random(1) % 8;
         CoinRound[currentRound] = Coin(
@@ -175,6 +176,7 @@ contract SquidGame is Ownable {
         );
         require(gameState != ChallengeState.Started, "Already started");
         require(gameState != ChallengeState.Quit, "Game was finished");
+
         CoinRound[currentRound].start_price = getPriceFeed(
             CoinRound[currentRound].feed
         );
@@ -294,9 +296,12 @@ contract SquidGame is Ownable {
 
     function withdraw() external {
         require(
-            currentRound == 6 || gameState == ChallengeState.Quit,
+            (currentRound == 6 &&
+                PlayersPlay[5][msg.sender] == challengeResult[5]) ||
+                gameState == ChallengeState.Quit,
             "Game not finished yet"
         );
+
         uint256 totalPotMinusHouse = getTotalPot() - (getTotalPot() * 10) / 100;
         uint256 currentPlayers = PlayersRound[currentRound].length;
         uint256 amountToSend = totalPotMinusHouse / currentPlayers;

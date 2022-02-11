@@ -92,4 +92,4 @@ Users that went to final 6 round will split the prize with the alived players.
 
 Mumbai Deployed Contracts:
 
-0x623436107c4EF18A99EC2cc8C6d703960489C130
+0xaF8aa1952bbB2c4AbE14C027224B44d2f683f73B
