@@ -135,6 +135,7 @@ contract BattleNFTFactory is Ownable {
         game.player2 = msg.sender;
         require(game.entry == msg.value, "Sent exact value");
         require(game.started == false, "Game already started");
+        require(game.aborted == false, "Game already aborted");
         require(
             CHAMPIONS.ownerOf(champion_id) == msg.sender,
             "You need to own this champion"
@@ -156,7 +157,7 @@ contract BattleNFTFactory is Ownable {
         require(id < allGames.length);
         Game storage game = allGames[id];
         require(
-            game.start_timestamp > block.timestamp,
+            block.timestamp > game.start_timestamp,
             "Game can not start yet"
         );
         require(game.started == false, "game already started");
@@ -175,7 +176,7 @@ contract BattleNFTFactory is Ownable {
         require(game.aborted == false, "Game   aborted");
         require(game.finished == false, "game not finished");
         require(
-            game.start_timestamp + game.duration > block.timestamp,
+            block.timestamp > game.start_timestamp + game.duration,
             "duration still not elapsed"
         );
         coin_player1[id].end_price = getPriceFeed(coin_player1[id].coin_feed);
@@ -197,14 +198,14 @@ contract BattleNFTFactory is Ownable {
         uint256 champion2 = coin_player2[id].champion_id;
         coin_player1[id].champion_score =
             coin_player1[id].score +
-            int256(CHAMPIONS.getAttackOf(champion1)) +
-            int256(CHAMPIONS.getRunOf(champion1)) +
-            int256(CHAMPIONS.getAttackOf(champion1));
+            int256(CHAMPIONS.attack(champion1)) +
+            int256(CHAMPIONS.run(champion1)) +
+            int256(CHAMPIONS.defense(champion1));
         coin_player2[id].champion_score =
             coin_player2[id].score +
-            int256(CHAMPIONS.getAttackOf(champion2)) +
-            int256(CHAMPIONS.getRunOf(champion2)) +
-            int256(CHAMPIONS.getAttackOf(champion2));
+            int256(CHAMPIONS.attack(champion2)) +
+            int256(CHAMPIONS.run(champion2)) +
+            int256(CHAMPIONS.defense(champion2));
         // In case of draw, the creator wins
         if (
             coin_player1[id].champion_score >= coin_player2[id].champion_score

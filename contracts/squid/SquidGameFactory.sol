@@ -30,4 +30,8 @@ contract SquidGameFactory is Ownable {
             pot
         );
     }
+
+    function totalGames() external view returns (uint256) {
+        return allGames.length;
+    }
 }

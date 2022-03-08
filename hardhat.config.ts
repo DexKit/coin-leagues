@@ -72,7 +72,7 @@ export default {
 
     mumbai: {
       url: "https://rpc-mumbai.matic.today",
-      gasPrice: 8000000000,
+      gasPrice: 48000000000,
       accounts: [PRIVATE_KEY],
     },
     matic: {

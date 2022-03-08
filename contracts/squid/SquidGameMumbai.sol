@@ -13,8 +13,8 @@ contract SquidGameMumbai is Ownable {
         Loser
     }
     uint256 currentRound;
-    uint256 startTimestamp;
-    uint256 endTimestamp;
+    uint256 public startTimestamp;
+    uint256 public endTimestamp;
     enum ChallengeState {
         Joining,
         Setup,
@@ -22,7 +22,7 @@ contract SquidGameMumbai is Ownable {
         Finished,
         Quit
     }
-    ChallengeState gameState;
+    ChallengeState public gameState;
     bool[6] challengeResult;
     address houseAddress = address(0);
     event PlayerJoinedRound(
@@ -75,8 +75,6 @@ contract SquidGameMumbai is Ownable {
 
     bool _houseWithdrawed = false;
 
-    Coin public coin;
-
     mapping(uint256 => mapping(address => bool)) public PlayersPlay;
     address[] public PlayersJoined;
     mapping(uint256 => address[]) public PlayersRound;
@@ -85,10 +83,11 @@ contract SquidGameMumbai is Ownable {
     mapping(uint256 => mapping(address => bool)) public PlayersRoundMap;
     mapping(address => bool) public PlayersJoinedMap;
     uint256 public pot = 1 ether;
-    uint256 lastChallengeTimestamp;
+    uint256 lastChallengeTimestamp = 0;
 
     constructor(uint256 _startTimestamp, uint256 _pot) {
         currentRound = 0;
+        require(_startTimestamp > block.timestamp, "future date required");
         startTimestamp = _startTimestamp;
         pot = _pot;
         gameState = ChallengeState.Joining;
@@ -144,8 +143,8 @@ contract SquidGameMumbai is Ownable {
             gameState != ChallengeState.Setup,
             "challenge was already setup"
         );
-        uint256 gameType = _random(0) % 1;
-        uint256 feed = _random(1) % 4;
+        uint256 gameType = _random(0) % 2;
+        uint256 feed = _random(1) % 3;
         CoinRound[currentRound] = Coin(
             getFeeds()[feed],
             0,
@@ -334,6 +333,13 @@ contract SquidGameMumbai is Ownable {
             "round can not be higher than current one"
         );
         return PlayersRound[round].length;
+    }
+
+    function getCurrentRoundPriceFeed() public view returns (int256) {
+        (, int256 price, , , ) = AggregatorV3Interface(
+            CoinRound[currentRound].feed
+        ).latestRoundData();
+        return price;
     }
 
     function getPriceFeed(address coin_feed) public view returns (int256) {

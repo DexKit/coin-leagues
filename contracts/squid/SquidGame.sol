@@ -22,7 +22,7 @@ contract SquidGame is Ownable {
         Finished,
         Quit
     }
-    ChallengeState gameState;
+    ChallengeState public gameState;
     bool[6] public challengeResult;
     address houseAddress = address(0);
     event PlayerJoinedRound(
@@ -75,8 +75,6 @@ contract SquidGame is Ownable {
 
     bool _houseWithdrawed = false;
 
-    Coin public coin;
-
     mapping(uint256 => mapping(address => bool)) public PlayersPlay;
     address[] public PlayersJoined;
     mapping(uint256 => address[]) public PlayersRound;
@@ -85,10 +83,11 @@ contract SquidGame is Ownable {
     mapping(uint256 => mapping(address => bool)) public PlayersRoundMap;
     mapping(address => bool) public PlayersJoinedMap;
     uint256 public pot = 1 ether;
-    uint256 lastChallengeTimestamp;
+    uint256 public lastChallengeTimestamp;
 
     constructor(uint256 _startTimestamp, uint256 _pot) {
         currentRound = 0;
+        require(_startTimestamp > block.timestamp, "future date required");
         startTimestamp = _startTimestamp;
         pot = _pot;
         gameState = ChallengeState.Joining;
@@ -341,6 +340,13 @@ contract SquidGame is Ownable {
         return PlayersRound[round].length;
     }
 
+    function getCurrentRoundPriceFeed() public view returns (int256) {
+        (, int256 price, , , ) = AggregatorV3Interface(
+            CoinRound[currentRound].feed
+        ).latestRoundData();
+        return price;
+    }
+
     function getPriceFeed(address coin_feed) public view returns (int256) {
         (, int256 price, , , ) = AggregatorV3Interface(coin_feed)
             .latestRoundData();
@@ -372,7 +378,7 @@ contract SquidGame is Ownable {
             0xd9FFdb71EbE7496cC440152d43986Aae0AB76665,
             // UNI
             0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C,
-            //ADA
+            // ADA
             0x882554df528115a743c4537828DA8D5B58e52544,
             // DOGE
             0xbaf9327b6564454F4a3364C33eFeEf032b4b4444

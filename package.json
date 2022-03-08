@@ -9,7 +9,8 @@
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
     "test": "npx hardhat  test test/squid.test.ts",
-    "test:factory": "npx hardhat  test test/factory-v3.test.ts",
+    "test:battle": "npx hardhat  test test/battle.test.ts",
+    "test:factory": "npx hardhat  test test/factory-v4.test.ts",
     "compile": "npx hardhat  compile",
     "script:whitelist": "npx hardhat run scripts/whitelist-address.ts --network matic",
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",

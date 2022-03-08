@@ -82,7 +82,7 @@ Mini game where users use their NFT to battle in a 1:1. User can choose a multip
 
 Mumbai Deployed Contracts:
 
-0x5258836834508e74a47116EF8Eb3D85Fd40D81B2
+0x9565C656f26C55a18af32dab3bE8aaff1B0BbB72
 
 # Squid League
 
