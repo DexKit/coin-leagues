@@ -82,6 +82,7 @@ contract SquidGame is Ownable {
     mapping(uint256 => mapping(address => bool)) public PlayersVoteMap;
     mapping(uint256 => mapping(address => bool)) public PlayersRoundMap;
     mapping(address => bool) public PlayersJoinedMap;
+    mapping(address => bool) public PlayerWithdraw;
     uint256 public pot = 1 ether;
     uint256 public lastChallengeTimestamp;
 
@@ -300,6 +301,8 @@ contract SquidGame is Ownable {
                 gameState == ChallengeState.Quit,
             "Game not finished yet"
         );
+        require(PlayerWithdraw[msg.sender] == false, "Already withdrawed");
+        PlayerWithdraw[msg.sender] = true;
 
         uint256 totalPotMinusHouse = getTotalPot() - (getTotalPot() * 10) / 100;
         uint256 currentPlayers = PlayersRound[currentRound].length;
@@ -334,7 +337,7 @@ contract SquidGame is Ownable {
         returns (uint256)
     {
         require(
-            round < currentRound,
+            round <= currentRound,
             "round can not be higher than current one"
         );
         return PlayersRound[round].length;

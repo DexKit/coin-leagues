@@ -23,7 +23,7 @@ contract SquidGameMumbai is Ownable {
         Quit
     }
     ChallengeState public gameState;
-    bool[6] challengeResult;
+    bool[6] public challengeResult;
     address houseAddress = address(0);
     event PlayerJoinedRound(
         uint256 round,
@@ -82,8 +82,9 @@ contract SquidGameMumbai is Ownable {
     mapping(uint256 => mapping(address => bool)) public PlayersVoteMap;
     mapping(uint256 => mapping(address => bool)) public PlayersRoundMap;
     mapping(address => bool) public PlayersJoinedMap;
+    mapping(address => bool) public PlayerWithdraw;
     uint256 public pot = 1 ether;
-    uint256 lastChallengeTimestamp = 0;
+    uint256 public lastChallengeTimestamp = 0;
 
     constructor(uint256 _startTimestamp, uint256 _pot) {
         currentRound = 0;
@@ -124,7 +125,7 @@ contract SquidGameMumbai is Ownable {
             gameState == ChallengeState.Setup,
             "Challenge needs to be setup phase"
         );
-        require(currentRound + 1 < 7, "There is only 6 rounds");
+        require(currentRound < 6, "There is only 6 rounds");
         PlayersRound[currentRound].push(msg.sender);
         PlayersRoundMap[currentRound][msg.sender] = true;
         PlayersPlay[currentRound][msg.sender] = play;
@@ -293,9 +294,13 @@ contract SquidGameMumbai is Ownable {
 
     function withdraw() external {
         require(
-            currentRound == 6 || gameState == ChallengeState.Quit,
+            (currentRound == 6 &&
+                PlayersPlay[5][msg.sender] == challengeResult[5]) ||
+                gameState == ChallengeState.Quit,
             "Game not finished yet"
         );
+        require(PlayerWithdraw[msg.sender] == false, "Already withdrawed");
+        PlayerWithdraw[msg.sender] = true;
         uint256 totalPotMinusHouse = getTotalPot() - (getTotalPot() * 10) / 100;
         uint256 currentPlayers = PlayersRound[currentRound].length;
         uint256 amountToSend = totalPotMinusHouse / currentPlayers;
@@ -329,7 +334,7 @@ contract SquidGameMumbai is Ownable {
         returns (uint256)
     {
         require(
-            round < currentRound,
+            round <= currentRound,
             "round can not be higher than current one"
         );
         return PlayersRound[round].length;
