@@ -32,12 +32,7 @@ contract SquidGameMumbai is Ownable {
         bool play
     );
     event PlayerJoined(address player, uint256 created_at);
-    event ChallengeSetup(
-        uint256 round,
-        address feed,
-        uint256 created_at,
-        uint256 game_type
-    );
+    event ChallengeSetup(uint256 round, address feed, uint256 created_at);
     event ChallengeStarted(
         uint256 round,
         int256 start_price,
@@ -69,7 +64,6 @@ contract SquidGameMumbai is Ownable {
         uint256 duration;
         int256 end_price;
         int256 score;
-        uint256 game_type;
     }
     mapping(uint256 => Coin) public CoinRound;
 
@@ -126,17 +120,21 @@ contract SquidGameMumbai is Ownable {
             "Challenge needs to be setup phase"
         );
         require(currentRound < 6, "There is only 6 rounds");
+        require(
+            PlayersRoundMap[currentRound][msg.sender] == false,
+            "You already played"
+        );
         PlayersRound[currentRound].push(msg.sender);
         PlayersRoundMap[currentRound][msg.sender] = true;
         PlayersPlay[currentRound][msg.sender] = play;
-        emit PlayerJoinedRound(0, msg.sender, block.timestamp, play);
+        emit PlayerJoinedRound(currentRound, msg.sender, block.timestamp, play);
     }
 
     // We setup first the challenge to start in few hours
     function setupChallenge() external {
         require(block.timestamp > startTimestamp, "Tournament not started");
         require(
-            block.timestamp > lastChallengeTimestamp + 24 * 3600,
+            block.timestamp > lastChallengeTimestamp + 1200,
             "Challenge needs at least to pass 24 hours to go next round"
         );
         require(gameState != ChallengeState.Started, "challenge started");
@@ -144,27 +142,14 @@ contract SquidGameMumbai is Ownable {
             gameState != ChallengeState.Setup,
             "challenge was already setup"
         );
-        uint256 gameType = _random(0) % 2;
+
         uint256 feed = _random(1) % 3;
-        CoinRound[currentRound] = Coin(
-            getFeeds()[feed],
-            0,
-            0,
-            0,
-            0,
-            0,
-            gameType
-        );
-        CoinRound[currentRound].start_timestamp = block.timestamp + 3600;
+        CoinRound[currentRound] = Coin(getFeeds()[feed], 0, 0, 0, 0, 0);
+        CoinRound[currentRound].start_timestamp = block.timestamp + 600;
         //we do rounds of one hour
-        CoinRound[currentRound].duration = 3600;
+        CoinRound[currentRound].duration = 300;
         gameState = ChallengeState.Setup;
-        emit ChallengeSetup(
-            currentRound,
-            getFeeds()[feed],
-            block.timestamp,
-            gameType
-        );
+        emit ChallengeSetup(currentRound, getFeeds()[feed], block.timestamp);
     }
 
     // The challenge starts
@@ -178,6 +163,7 @@ contract SquidGameMumbai is Ownable {
         CoinRound[currentRound].start_price = getPriceFeed(
             CoinRound[currentRound].feed
         );
+        CoinRound[currentRound].start_timestamp = block.timestamp;
         gameState = ChallengeState.Started;
         emit ChallengeStarted(
             currentRound,
@@ -200,22 +186,13 @@ contract SquidGameMumbai is Ownable {
         CoinRound[currentRound].score = (((CoinRound[currentRound].end_price -
             CoinRound[currentRound].start_price) * 100000) /
             CoinRound[currentRound].end_price);
-        // If it is bull score needs to be positive
-        if (CoinRound[currentRound].game_type == 0) {
-            if (CoinRound[currentRound].score > 0) {
-                challengeResult[currentRound] = true;
-            } else {
-                challengeResult[currentRound] = false;
-            }
+
+        if (CoinRound[currentRound].score > 0) {
+            challengeResult[currentRound] = true;
+        } else {
+            challengeResult[currentRound] = false;
         }
-        // If it is bear score needs to be negative
-        if (CoinRound[currentRound].game_type == 1) {
-            if (CoinRound[currentRound].score > 0) {
-                challengeResult[currentRound] = false;
-            } else {
-                challengeResult[currentRound] = true;
-            }
-        }
+
         currentRound = currentRound + 1;
         lastChallengeTimestamp = block.timestamp;
         gameState = ChallengeState.Finished;

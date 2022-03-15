@@ -32,12 +32,7 @@ contract SquidGame is Ownable {
         bool play
     );
     event PlayerJoined(address player, uint256 created_at);
-    event ChallengeSetup(
-        uint256 round,
-        address feed,
-        uint256 created_at,
-        uint256 game_type
-    );
+    event ChallengeSetup(uint256 round, address feed, uint256 created_at);
     event ChallengeStarted(
         uint256 round,
         int256 start_price,
@@ -69,8 +64,8 @@ contract SquidGame is Ownable {
         uint256 duration;
         int256 end_price;
         int256 score;
-        uint256 game_type;
     }
+
     mapping(uint256 => Coin) public CoinRound;
 
     bool _houseWithdrawed = false;
@@ -126,6 +121,10 @@ contract SquidGame is Ownable {
             "Challenge needs to be setup phase"
         );
         require(currentRound < 6, "There is only 6 rounds");
+        require(
+            PlayersRoundMap[currentRound][msg.sender] == false,
+            "You already played"
+        );
         PlayersRound[currentRound].push(msg.sender);
         PlayersRoundMap[currentRound][msg.sender] = true;
         PlayersPlay[currentRound][msg.sender] = play;
@@ -145,27 +144,14 @@ contract SquidGame is Ownable {
             "challenge was already setup"
         );
         require(currentRound < 6, "No more challenges");
-        uint256 gameType = _random(0) % 1;
+
         uint256 feed = _random(1) % 8;
-        CoinRound[currentRound] = Coin(
-            getFeeds()[feed],
-            0,
-            0,
-            0,
-            0,
-            0,
-            gameType
-        );
+        CoinRound[currentRound] = Coin(getFeeds()[feed], 0, 0, 0, 0, 0);
         CoinRound[currentRound].start_timestamp = block.timestamp + 3600;
         //we do rounds of one hour
         CoinRound[currentRound].duration = 3600;
         gameState = ChallengeState.Setup;
-        emit ChallengeSetup(
-            currentRound,
-            getFeeds()[feed],
-            block.timestamp,
-            gameType
-        );
+        emit ChallengeSetup(currentRound, getFeeds()[feed], block.timestamp);
     }
 
     // The challenge starts
@@ -181,6 +167,7 @@ contract SquidGame is Ownable {
             CoinRound[currentRound].feed
         );
         gameState = ChallengeState.Started;
+        CoinRound[currentRound].start_timestamp = block.timestamp;
         emit ChallengeStarted(
             currentRound,
             CoinRound[currentRound].start_price,
@@ -202,22 +189,13 @@ contract SquidGame is Ownable {
         CoinRound[currentRound].score = (((CoinRound[currentRound].end_price -
             CoinRound[currentRound].start_price) * 100000) /
             CoinRound[currentRound].end_price);
-        // If it is bull score needs to be positive
-        if (CoinRound[currentRound].game_type == 0) {
-            if (CoinRound[currentRound].score > 0) {
-                challengeResult[currentRound] = true;
-            } else {
-                challengeResult[currentRound] = false;
-            }
+
+        if (CoinRound[currentRound].score > 0) {
+            challengeResult[currentRound] = true;
+        } else {
+            challengeResult[currentRound] = false;
         }
-        // If it is bear score needs to be negative
-        if (CoinRound[currentRound].game_type == 1) {
-            if (CoinRound[currentRound].score > 0) {
-                challengeResult[currentRound] = false;
-            } else {
-                challengeResult[currentRound] = true;
-            }
-        }
+
         currentRound = currentRound + 1;
         lastChallengeTimestamp = block.timestamp;
         gameState = ChallengeState.Finished;
