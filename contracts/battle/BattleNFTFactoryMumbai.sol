@@ -162,6 +162,7 @@ contract BattleNFTFactoryMumbai is Ownable {
         require(game.started == false, "game already started");
         require(game.aborted == false, "Game  aborted");
         require(game.player2 != address(0), "game not full");
+        game.start_timestamp = block.timestamp;
         coin_player1[id].start_price = getPriceFeed(coin_player1[id].coin_feed);
         coin_player2[id].start_price = getPriceFeed(coin_player2[id].coin_feed);
         game.started = true;

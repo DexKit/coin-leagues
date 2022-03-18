@@ -12,9 +12,11 @@ contract SquidGame is Ownable {
         Winner,
         Loser
     }
+
     uint256 currentRound;
     uint256 public startTimestamp;
     uint256 public endTimestamp;
+    uint256 constant MAX_ROUNDS = 6;
     enum ChallengeState {
         Joining,
         Setup,
@@ -23,7 +25,7 @@ contract SquidGame is Ownable {
         Quit
     }
     ChallengeState public gameState;
-    bool[6] public challengeResult;
+    bool[MAX_ROUNDS] public challengeResult;
     address houseAddress = address(0);
     event PlayerJoinedRound(
         uint256 round,
@@ -120,7 +122,7 @@ contract SquidGame is Ownable {
             gameState == ChallengeState.Setup,
             "Challenge needs to be setup phase"
         );
-        require(currentRound < 6, "There is only 6 rounds");
+        require(currentRound < MAX_ROUNDS, "There is only 6 rounds");
         require(
             PlayersRoundMap[currentRound][msg.sender] == false,
             "You already played"
@@ -143,7 +145,7 @@ contract SquidGame is Ownable {
             gameState != ChallengeState.Setup,
             "challenge was already setup"
         );
-        require(currentRound < 6, "No more challenges");
+        require(currentRound < MAX_ROUNDS, "No more challenges");
 
         uint256 feed = _random(1) % 8;
         CoinRound[currentRound] = Coin(getFeeds()[feed], 0, 0, 0, 0, 0);
@@ -162,6 +164,7 @@ contract SquidGame is Ownable {
         );
         require(gameState != ChallengeState.Started, "Already started");
         require(gameState != ChallengeState.Quit, "Game was finished");
+        require(currentRound < MAX_ROUNDS, "No more challenges");
 
         CoinRound[currentRound].start_price = getPriceFeed(
             CoinRound[currentRound].feed
@@ -183,6 +186,7 @@ contract SquidGame is Ownable {
             "Duration not elapsed yet"
         );
         require(gameState != ChallengeState.Finished, "Game already finished");
+        require(currentRound < MAX_ROUNDS, "No more challenges");
         CoinRound[currentRound].end_price = getPriceFeed(
             CoinRound[currentRound].feed
         );
@@ -274,8 +278,9 @@ contract SquidGame is Ownable {
 
     function withdraw() external {
         require(
-            (currentRound == 6 &&
-                PlayersPlay[5][msg.sender] == challengeResult[5]) ||
+            (currentRound == MAX_ROUNDS &&
+                PlayersPlay[MAX_ROUNDS - 1][msg.sender] ==
+                challengeResult[MAX_ROUNDS - 1]) ||
                 gameState == ChallengeState.Quit,
             "Game not finished yet"
         );
@@ -283,7 +288,13 @@ contract SquidGame is Ownable {
         PlayerWithdraw[msg.sender] = true;
 
         uint256 totalPotMinusHouse = getTotalPot() - (getTotalPot() * 10) / 100;
-        uint256 currentPlayers = PlayersRound[currentRound].length;
+        uint256 currentPlayers;
+        if (currentRound == MAX_ROUNDS) {
+            currentPlayers = PlayersRound[MAX_ROUNDS - 1].length;
+        } else {
+            // If we used the Challenge Quit  early
+            currentPlayers = PlayersRound[currentRound].length;
+        }
         uint256 amountToSend = totalPotMinusHouse / currentPlayers;
 
         (bool sent, ) = msg.sender.call{value: amountToSend}("");
@@ -293,7 +304,7 @@ contract SquidGame is Ownable {
 
     function withdrawHouse() external {
         require(
-            currentRound == 6 || gameState == ChallengeState.Quit,
+            currentRound == MAX_ROUNDS || gameState == ChallengeState.Quit,
             "Game not finished yet"
         );
         require(_houseWithdrawed == false, "House already withdrawed");

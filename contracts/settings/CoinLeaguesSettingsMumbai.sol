@@ -23,7 +23,7 @@ contract CoinLeagueSettingsMumbai is ICoinLeagueSettings {
         // DAI / USD
         _chainlink_feeds[0x0FCAa9c899EC5A91eBc3D5Dd869De833b06fB046] = true;
         // ETH / USD
-        _chainlink_feeds[0x007A22900a3B98143368Bd5906f8E17e9867581b] = true;
+        _chainlink_feeds[0x0715A7794a1dc8e42615F059dD6e406A6594651A] = true;
         // MATIC / USD
         _chainlink_feeds[0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada] = true;
         // USDC / USD
