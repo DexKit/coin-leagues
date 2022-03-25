@@ -3,25 +3,23 @@ pragma solidity ^0.8.0;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * In progress
  */
-contract SquidGameMumbai is Ownable {
+contract SquidGameToken is Ownable {
+    using SafeERC20 for IERC20;
     enum GameType {
         Winner,
         Loser
     }
-    uint256 constant MAX_ROUNDS = 2;
+
     uint256 currentRound;
     uint256 public startTimestamp;
     uint256 public endTimestamp;
-    enum PlayingType {
-        NotPlayed,
-        Up,
-        Down
-    }
-
+    uint256 constant MAX_ROUNDS = 6;
     enum ChallengeState {
         Joining,
         Setup,
@@ -29,17 +27,18 @@ contract SquidGameMumbai is Ownable {
         Finished,
         Quit
     }
-
-
     ChallengeState public gameState;
-    PlayingType[MAX_ROUNDS] public challengeResult;
+    bool[MAX_ROUNDS] public challengeResult;
     address houseAddress = address(0);
+    address internal immutable NativeCoin =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     event PlayerJoinedRound(
         uint256 round,
         address player,
         uint256 created_at,
-        PlayingType play
+        bool play
     );
+
     event PlayerJoined(address player, uint256 created_at);
     event ChallengeSetup(uint256 round, address feed, uint256 created_at);
     event ChallengeStarted(
@@ -51,7 +50,7 @@ contract SquidGameMumbai is Ownable {
         uint256 round,
         int256 end_price,
         uint256 created_at,
-        PlayingType result
+        bool result
     );
 
     event VoteToQuit(uint256 round, address player, uint256 created_at);
@@ -74,11 +73,12 @@ contract SquidGameMumbai is Ownable {
         int256 end_price;
         int256 score;
     }
+
     mapping(uint256 => Coin) public CoinRound;
 
     bool _houseWithdrawed = false;
 
-    mapping(uint256 => mapping(address => PlayingType)) public PlayersPlay;
+    mapping(uint256 => mapping(address => bool)) public PlayersPlay;
     address[] public PlayersJoined;
     mapping(uint256 => address[]) public PlayersRound;
     mapping(uint256 => address[]) public PlayersVote;
@@ -87,18 +87,33 @@ contract SquidGameMumbai is Ownable {
     mapping(address => bool) public PlayersJoinedMap;
     mapping(address => bool) public PlayerWithdraw;
     uint256 public pot = 1 ether;
-    uint256 public lastChallengeTimestamp = 0;
+    address public coin_to_play;
+    uint256 public lastChallengeTimestamp;
 
-    constructor(uint256 _startTimestamp, uint256 _pot) {
+    constructor(
+        uint256 _startTimestamp,
+        uint256 _pot,
+        address _coin_to_play
+    ) {
         currentRound = 0;
         require(_startTimestamp > block.timestamp, "future date required");
         startTimestamp = _startTimestamp;
         pot = _pot;
         gameState = ChallengeState.Joining;
+        coin_to_play = _coin_to_play;
     }
 
     function joinGame() external payable {
-        require(msg.value == pot, "Need to sent exact amount of pot");
+        if (coin_to_play == NativeCoin) {
+            require(msg.value == pot, "Need to sent exact amount of pot");
+        } else {
+            IERC20(coin_to_play).safeTransferFrom(
+                msg.sender,
+                address(this),
+                pot
+            );
+        }
+
         require(PlayersJoinedMap[msg.sender] == false, "Already joined");
         PlayersJoinedMap[msg.sender] = true;
         PlayersJoined.push(msg.sender);
@@ -108,7 +123,7 @@ contract SquidGameMumbai is Ownable {
     /**
      *  Go to Next Challenge
      */
-    function playChallenge(PlayingType play) external {
+    function playChallenge(bool play) external {
         require(
             PlayersJoinedMap[msg.sender] == true,
             "you need join game to be able to go next challenges"
@@ -128,7 +143,6 @@ contract SquidGameMumbai is Ownable {
             gameState == ChallengeState.Setup,
             "Challenge needs to be setup phase"
         );
-        require(play != PlayingType.NotPlayed, "You need to play up or down");
         require(currentRound < MAX_ROUNDS, "There is only 6 rounds");
         require(
             PlayersRoundMap[currentRound][msg.sender] == false,
@@ -144,7 +158,7 @@ contract SquidGameMumbai is Ownable {
     function setupChallenge() external {
         require(block.timestamp > startTimestamp, "Tournament not started");
         require(
-            block.timestamp > lastChallengeTimestamp + 1200,
+            block.timestamp > lastChallengeTimestamp + 24 * 3600,
             "Challenge needs at least to pass 24 hours to go next round"
         );
         require(gameState != ChallengeState.Started, "challenge started");
@@ -152,13 +166,13 @@ contract SquidGameMumbai is Ownable {
             gameState != ChallengeState.Setup,
             "challenge was already setup"
         );
-        require(currentRound < MAX_ROUNDS, "There is only 6 rounds");
+        require(currentRound < MAX_ROUNDS, "No more challenges");
 
-        uint256 feed = _random(1) % 3;
+        uint256 feed = _random(1) % 8;
         CoinRound[currentRound] = Coin(getFeeds()[feed], 0, 0, 0, 0, 0);
-        CoinRound[currentRound].start_timestamp = block.timestamp + 600;
+        CoinRound[currentRound].start_timestamp = block.timestamp + 3600;
         //we do rounds of one hour
-        CoinRound[currentRound].duration = 300;
+        CoinRound[currentRound].duration = 3600;
         gameState = ChallengeState.Setup;
         emit ChallengeSetup(currentRound, getFeeds()[feed], block.timestamp);
     }
@@ -171,12 +185,13 @@ contract SquidGameMumbai is Ownable {
         );
         require(gameState != ChallengeState.Started, "Already started");
         require(gameState != ChallengeState.Quit, "Game was finished");
-        require(currentRound < MAX_ROUNDS, "There is only 6 rounds");
+        require(currentRound < MAX_ROUNDS, "No more challenges");
+
         CoinRound[currentRound].start_price = getPriceFeed(
             CoinRound[currentRound].feed
         );
-        CoinRound[currentRound].start_timestamp = block.timestamp;
         gameState = ChallengeState.Started;
+        CoinRound[currentRound].start_timestamp = block.timestamp;
         emit ChallengeStarted(
             currentRound,
             CoinRound[currentRound].start_price,
@@ -192,7 +207,7 @@ contract SquidGameMumbai is Ownable {
             "Duration not elapsed yet"
         );
         require(gameState != ChallengeState.Finished, "Game already finished");
-        require(currentRound < MAX_ROUNDS, "There is only 6 rounds");
+        require(currentRound < MAX_ROUNDS, "No more challenges");
         CoinRound[currentRound].end_price = getPriceFeed(
             CoinRound[currentRound].feed
         );
@@ -201,9 +216,9 @@ contract SquidGameMumbai is Ownable {
             CoinRound[currentRound].end_price);
 
         if (CoinRound[currentRound].score > 0) {
-            challengeResult[currentRound] = PlayingType.Up;
+            challengeResult[currentRound] = true;
         } else {
-            challengeResult[currentRound] = PlayingType.Down;
+            challengeResult[currentRound] = false;
         }
 
         currentRound = currentRound + 1;
@@ -286,14 +301,13 @@ contract SquidGameMumbai is Ownable {
         require(
             (currentRound == MAX_ROUNDS &&
                 PlayersPlay[MAX_ROUNDS - 1][msg.sender] ==
-                challengeResult[MAX_ROUNDS - 1]&&
-                PlayersPlay[MAX_ROUNDS - 1][msg.sender] !=
-                PlayingType.NotPlayed) ||
+                challengeResult[MAX_ROUNDS - 1]) ||
                 gameState == ChallengeState.Quit,
             "Game not finished yet"
         );
         require(PlayerWithdraw[msg.sender] == false, "Already withdrawed");
         PlayerWithdraw[msg.sender] = true;
+
         uint256 totalPotMinusHouse = getTotalPot() - (getTotalPot() * 10) / 100;
         uint256 currentPlayers;
         if (currentRound == MAX_ROUNDS) {
@@ -302,11 +316,14 @@ contract SquidGameMumbai is Ownable {
             // If we used the Challenge Quit  early
             currentPlayers = PlayersRound[currentRound].length;
         }
-
         uint256 amountToSend = totalPotMinusHouse / currentPlayers;
+        if (coin_to_play == NativeCoin) {
+            (bool sent, ) = msg.sender.call{value: amountToSend}("");
+            require(sent, "Failed to send Ether");
+        } else {
+            IERC20(coin_to_play).safeTransfer(msg.sender, amountToSend);
+        }
 
-        (bool sent, ) = msg.sender.call{value: amountToSend}("");
-        require(sent, "Failed to send Ether");
         emit Withdrawed(amountToSend, msg.sender, block.timestamp);
     }
 
@@ -322,9 +339,12 @@ contract SquidGameMumbai is Ownable {
         if (PlayersRound[currentRound].length == 0) {
             totalPotHouse = getTotalPot();
         }
-
-        (bool sent, ) = houseAddress.call{value: totalPotHouse}("");
-        require(sent, "Failed to send Ether");
+        if (coin_to_play == NativeCoin) {
+            (bool sent, ) = houseAddress.call{value: totalPotHouse}("");
+            require(sent, "Failed to send Ether");
+        } else {
+            IERC20(coin_to_play).safeTransfer(msg.sender, totalPotHouse);
+        }
         emit WithdrawedHouse(totalPotHouse, block.timestamp);
     }
 
@@ -366,14 +386,22 @@ contract SquidGameMumbai is Ownable {
     /**
      * returns feed associated with coin
      */
-    function getFeeds() internal pure returns (address[3] memory) {
+    function getFeeds() internal pure returns (address[7] memory) {
         return [
             // BTC
-            0x007A22900a3B98143368Bd5906f8E17e9867581b,
+            0xc907E116054Ad103354f2D350FD2514433D57F6f,
             // ETH
-            0x0715A7794a1dc8e42615F059dD6e406A6594651A,
-            // MATIC
-            0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada
+            0xF9680D99D6C9589e2a93a78A04A279e509205945,
+            // DOT
+            0xacb51F1a83922632ca02B25a8164c10748001BdE,
+            // LINK,
+            0xd9FFdb71EbE7496cC440152d43986Aae0AB76665,
+            // UNI
+            0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C,
+            // ADA
+            0x882554df528115a743c4537828DA8D5B58e52544,
+            // DOGE
+            0xbaf9327b6564454F4a3364C33eFeEf032b4b4444
         ];
     }
 }

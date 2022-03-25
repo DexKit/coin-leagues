@@ -78,7 +78,7 @@ export default {
     matic: {
       url: `https://polygon-rpc.com/`,
       accounts: [PRIVATE_KEY],
-      gasPrice: 60000000000,
+      gasPrice: 80000000000,
     },
     bsc: {
       url: `https://bsc-dataseed.binance.org/`,

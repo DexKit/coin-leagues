@@ -26,6 +26,8 @@
     "buy-kit:polygon": "npx hardhat run scripts/buy-kit.ts --network polygon",
     "deploy-nft-league:mumbai": "npx hardhat run scripts/NFTLeague/deploy-nft-league-mumbai.ts --network mumbai",
     "deploy-squid:mumbai": "npx hardhat run scripts/SquidGame/deploy-squid-mumbai.ts --network mumbai",
+    "deploy-nft-league:matic": "npx hardhat run scripts/NFTLeague/deploy-nft-league-matic.ts --network matic",
+    "deploy-squid:matic": "npx hardhat run scripts/SquidGame/deploy-squid-matic.ts --network matic",
     "owner:mumbai": "npx hardhat run scripts/owner.ts --network mumbai"
   },
   "devDependencies": {

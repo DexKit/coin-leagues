@@ -17,6 +17,12 @@ contract SquidGame is Ownable {
     uint256 public startTimestamp;
     uint256 public endTimestamp;
     uint256 constant MAX_ROUNDS = 6;
+    enum PlayingType {
+        NotPlayed,
+        Up,
+        Down
+    }
+
     enum ChallengeState {
         Joining,
         Setup,
@@ -25,13 +31,13 @@ contract SquidGame is Ownable {
         Quit
     }
     ChallengeState public gameState;
-    bool[MAX_ROUNDS] public challengeResult;
-    address houseAddress = address(0);
+    PlayingType[MAX_ROUNDS] public challengeResult;
+    address houseAddress = address(0xcb83df7B6B178AF9dd7791dA7eeC85b0702F4017);
     event PlayerJoinedRound(
         uint256 round,
         address player,
         uint256 created_at,
-        bool play
+        PlayingType play
     );
     event PlayerJoined(address player, uint256 created_at);
     event ChallengeSetup(uint256 round, address feed, uint256 created_at);
@@ -44,7 +50,7 @@ contract SquidGame is Ownable {
         uint256 round,
         int256 end_price,
         uint256 created_at,
-        bool result
+        PlayingType result
     );
 
     event VoteToQuit(uint256 round, address player, uint256 created_at);
@@ -72,7 +78,7 @@ contract SquidGame is Ownable {
 
     bool _houseWithdrawed = false;
 
-    mapping(uint256 => mapping(address => bool)) public PlayersPlay;
+    mapping(uint256 => mapping(address => PlayingType)) public PlayersPlay;
     address[] public PlayersJoined;
     mapping(uint256 => address[]) public PlayersRound;
     mapping(uint256 => address[]) public PlayersVote;
@@ -102,7 +108,7 @@ contract SquidGame is Ownable {
     /**
      *  Go to Next Challenge
      */
-    function playChallenge(bool play) external {
+    function playChallenge(PlayingType play) external {
         require(
             PlayersJoinedMap[msg.sender] == true,
             "you need join game to be able to go next challenges"
@@ -122,6 +128,7 @@ contract SquidGame is Ownable {
             gameState == ChallengeState.Setup,
             "Challenge needs to be setup phase"
         );
+        require(play != PlayingType.NotPlayed, "You need to play up or down");
         require(currentRound < MAX_ROUNDS, "There is only 6 rounds");
         require(
             PlayersRoundMap[currentRound][msg.sender] == false,
@@ -147,7 +154,7 @@ contract SquidGame is Ownable {
         );
         require(currentRound < MAX_ROUNDS, "No more challenges");
 
-        uint256 feed = _random(1) % 8;
+        uint256 feed = _random(1) % 17;
         CoinRound[currentRound] = Coin(getFeeds()[feed], 0, 0, 0, 0, 0);
         CoinRound[currentRound].start_timestamp = block.timestamp + 3600;
         //we do rounds of one hour
@@ -195,9 +202,9 @@ contract SquidGame is Ownable {
             CoinRound[currentRound].end_price);
 
         if (CoinRound[currentRound].score > 0) {
-            challengeResult[currentRound] = true;
+            challengeResult[currentRound] = PlayingType.Up;
         } else {
-            challengeResult[currentRound] = false;
+            challengeResult[currentRound] = PlayingType.Down;
         }
 
         currentRound = currentRound + 1;
@@ -280,8 +287,9 @@ contract SquidGame is Ownable {
         require(
             (currentRound == MAX_ROUNDS &&
                 PlayersPlay[MAX_ROUNDS - 1][msg.sender] ==
-                challengeResult[MAX_ROUNDS - 1]) ||
-                gameState == ChallengeState.Quit,
+                challengeResult[MAX_ROUNDS - 1] &&
+                PlayersPlay[MAX_ROUNDS - 1][msg.sender] !=
+                PlayingType.NotPlayed) || gameState == ChallengeState.Quit,
             "Game not finished yet"
         );
         require(PlayerWithdraw[msg.sender] == false, "Already withdrawed");
@@ -292,7 +300,7 @@ contract SquidGame is Ownable {
         if (currentRound == MAX_ROUNDS) {
             currentPlayers = PlayersRound[MAX_ROUNDS - 1].length;
         } else {
-            // If we used the Challenge Quit  early
+            // If we used the Challenge Quit early
             currentPlayers = PlayersRound[currentRound].length;
         }
         uint256 amountToSend = totalPotMinusHouse / currentPlayers;
@@ -358,7 +366,7 @@ contract SquidGame is Ownable {
     /**
      * returns feed associated with coin
      */
-    function getFeeds() internal pure returns (address[7] memory) {
+    function getFeeds() internal pure returns (address[16] memory) {
         return [
             // BTC
             0xc907E116054Ad103354f2D350FD2514433D57F6f,
@@ -373,7 +381,25 @@ contract SquidGame is Ownable {
             // ADA
             0x882554df528115a743c4537828DA8D5B58e52544,
             // DOGE
-            0xbaf9327b6564454F4a3364C33eFeEf032b4b4444
+            0xbaf9327b6564454F4a3364C33eFeEf032b4b4444,
+            // Luna
+            0x1248573D9B62AC86a3ca02aBC6Abe6d403Cd1034,
+            // Matic
+            0xAB594600376Ec9fD91F8e885dADF0CE036862dE0,
+            // Sand
+            0x3D49406EDd4D52Fb7FFd25485f32E073b529C924,
+            // ZRX
+            0x6EA4d89474d9410939d429B786208c74853A5B47,
+            // XMR
+            0xBE6FB0AB6302B693368D0E9001fAF77ecc6571db,
+            // XRP
+            0x785ba89291f676b5386652eB12b30cF361020694,
+            // Sushi
+            0x49B0c695039243BBfEb8EcD054EB70061fd54aa0,
+            // Sol
+            0x10C8264C0935b3B9870013e057f330Ff3e9C56dC,
+            // BNB
+            0x82a6c4AF830caa6c97bb504425f6A66165C2c26e
         ];
     }
 }
