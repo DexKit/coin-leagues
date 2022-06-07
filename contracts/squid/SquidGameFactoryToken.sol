@@ -37,4 +37,8 @@ contract SquidGameFactoryToken is Ownable {
     function totalGames() external view returns (uint256) {
         return allGames.length;
     }
+
+    function joinGame(address game) external payable {
+        SquidGameToken(game).joinGame(msg.sender);
+    }
 }

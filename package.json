@@ -14,6 +14,7 @@
     "compile": "npx hardhat  compile",
     "script:whitelist": "npx hardhat run scripts/whitelist-address.ts --network matic",
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
+    "deploy-tether:mumbai": "npx hardhat run scripts/Token/deploy-tether-mumbai.ts --network mumbai",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic",
     "deploy:v2:polygon": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network matic",
     "deploy:v2:binance": "npx hardhat run scripts/deploy-factory-bsc-v2.ts --network bsc",

@@ -8,7 +8,7 @@ import "../interfaces/ICoinLeagueSettings.sol";
 import "../interfaces/IChampions.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CoinLeaguesV3 is Ownable {
+contract CoinLeagueV3 is Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     enum GameType {
@@ -108,7 +108,10 @@ contract CoinLeaguesV3 is Ownable {
             "Amount of coins not supported"
         );
         require(_abort_timestamp > block.timestamp, "Future date is required");
-        require(_start_timestamp > block.timestamp - 10 minutes, "At least only past 10 minutes dates");
+        require(
+            _start_timestamp > block.timestamp - 10 minutes,
+            "At least only past 10 minutes dates"
+        );
         require(
             ICoinLeagueSettings(game.settings).isAllowedAmounts(_amount),
             "Amount not supported"
@@ -176,25 +179,30 @@ contract CoinLeaguesV3 is Ownable {
         }
 
         coins[captain_coin] = Coin(captain_coin, 0, 0, 0);
-        if(amounts[msg.sender] == 0){
+        if (amounts[msg.sender] == 0) {
             amounts[msg.sender] = msg.value;
             game.total_amount_collected = game.total_amount_collected.add(
                 msg.value
             );
             player_index[msg.sender] = players.length;
             players.push(
-                Player(coin_feeds, msg.sender, captain_coin, champion_id, 0, affiliate)
+                Player(
+                    coin_feeds,
+                    msg.sender,
+                    captain_coin,
+                    champion_id,
+                    0,
+                    affiliate
+                )
             );
             emit JoinedGame(msg.sender, affiliate);
-        }else{
+        } else {
             // If player already joined, he can change again all the coins again
             uint256 index = player_index[msg.sender];
             players[index].captain_coin = captain_coin;
             players[index].coin_feeds = coin_feeds;
             players[index].champion_id = champion_id;
         }
-        
-      
     }
 
     /**
@@ -222,9 +230,12 @@ contract CoinLeaguesV3 is Ownable {
      * When game starts we get all current prices for the coins of each player
      */
     function startGame() external onlyOwner {
-        require(block.timestamp >= game.start_timestamp, "Game can not start yet");
+        require(
+            block.timestamp >= game.start_timestamp,
+            "Game can not start yet"
+        );
         // If time passed we can start game only with 2 players
-        require(players.length > 1, "Not meet min number of players");  
+        require(players.length > 1, "Not meet min number of players");
         require(game.aborted == false, "Game was aborted");
         require(game.started == false, "Game already started");
         game.started = true;
@@ -362,9 +373,9 @@ contract CoinLeaguesV3 is Ownable {
             } else {
                 if (score < score1) {
                     if (score1 < score2) {
-                        if(score2 < score3){
+                        if (score2 < score3) {
                             score3_index = score2_index;
-                            score3 = score2; 
+                            score3 = score2;
                         }
                         score2_index = score1_index;
                         score2 = score1;
@@ -403,7 +414,11 @@ contract CoinLeaguesV3 is Ownable {
                 score: players[score3_index].score,
                 claimed: false
             });
-            emit WinnedMultiple(players[score1_index].player_address, players[score2_index].player_address, players[score3_index].player_address);
+            emit WinnedMultiple(
+                players[score1_index].player_address,
+                players[score2_index].player_address,
+                players[score3_index].player_address
+            );
         } else {
             winners[players[score1_index].player_address] = Winner({
                 place: 0,
@@ -417,10 +432,7 @@ contract CoinLeaguesV3 is Ownable {
 
     function claim(address payable owner) external {
         require(game.finished == true, "Game not finished");
-        require(
-            winners[owner].winner_address == owner,
-            "You are not a winner"
-        );
+        require(winners[owner].winner_address == owner, "You are not a winner");
         require(winners[owner].claimed == false, "You already claimed");
         winners[owner].claimed = true;
         uint256 amount = game.total_amount_collected - amountToHouse();

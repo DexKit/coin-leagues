@@ -218,9 +218,11 @@ contract BattleNFTFactory is Ownable {
 
         game.finished = true;
         emit GameFinished(id, block.timestamp, game.winner);
+        // Claim when game finished
+        claim(id);
     }
 
-    function claim(uint256 id) external {
+    function claim(uint256 id) internal {
         require(id < allGames.length);
         Game storage game = allGames[id];
         require(game.claimed == false, "Already claimed");
@@ -247,26 +249,6 @@ contract BattleNFTFactory is Ownable {
         require(game.player2 == address(0), "Game  is already full");
         game.aborted = true;
         emit Aborted(id, block.timestamp);
-        game.withdrawed = true;
-        (bool sent, ) = game.player1.call{value: game.entry}("");
-        require(sent, "Failed to send Ether");
-        emit Withdrawed(id, block.timestamp);
-    }
-
-    function abortGame(uint256 id) external {
-        require(id < allGames.length);
-        Game storage game = allGames[id];
-        require(game.started == false, "Game  already started");
-        require(game.aborted == false, "Game  already aborted");
-        require(game.player2 == address(0), "Game  is already full");
-        game.aborted = true;
-        emit Aborted(id, block.timestamp);
-    }
-
-    function withdraw(uint256 id) internal {
-        Game storage game = allGames[id];
-        require(game.aborted == true, "Game  not aborted");
-        require(game.withdrawed == false, "Game already withdrawed");
         game.withdrawed = true;
         (bool sent, ) = game.player1.call{value: game.entry}("");
         require(sent, "Failed to send Ether");

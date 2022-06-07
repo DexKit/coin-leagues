@@ -4,8 +4,7 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
-import "../interfaces/ICoinLeagueSettings.sol";
-import "../interfaces/IChampions.sol";
+import "../interfaces/ICoinLeagueSettingsV2.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -43,9 +42,6 @@ contract CoinLeagueV3Factory is Ownable {
     address internal immutable NativeCoin =
         0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    IChampions internal immutable CHAMPIONS =
-        IChampions(0xf2a669A2749073E55c56E27C2f4EdAdb7BD8d95D);
-
     address public settings;
 
     struct Player {
@@ -53,7 +49,6 @@ contract CoinLeagueV3Factory is Ownable {
         address[] coin_feeds;
         address player_address;
         address captain_coin;
-        uint256 champion_id;
         int256 score;
         address affiliate;
     }
@@ -122,24 +117,47 @@ contract CoinLeagueV3Factory is Ownable {
         address _coin_to_play
     ) external {
         require(
-            ICoinLeagueSettings(settings).isAllowedAmountPlayers(_num_players),
+            ICoinLeagueSettingsV2(settings).isAllowedAmountPlayers(
+                _num_players
+            ),
             "Amount of players not supported"
         );
         require(
-            ICoinLeagueSettings(settings).isAllowedAmountCoins(_num_coins),
+            ICoinLeagueSettingsV2(settings).isAllowedAmountCoins(_num_coins),
             "Amount of coins not supported"
+        );
+
+        require(
+            ICoinLeagueSettingsV2(settings).isAllowedCurrency(_coin_to_play),
+            "Currency not supported"
         );
         require(_abort_timestamp > block.timestamp, "Future date is required");
         require(
             _start_timestamp > block.timestamp - 10 minutes,
             "At least only past 10 minutes dates"
         );
-        require(
+        if (_coin_to_play == NativeCoin) {
+            require(
+                ICoinLeagueSettingsV2(settings).isAllowedAmountsNativeCurrency(
+                    _amount
+                ),
+                "Native Amount not supported"
+            );
+        } else {
+            require(
+                ICoinLeagueSettingsV2(settings).isAllowedAmountsStableCurrency(
+                    _amount
+                ),
+                "Token Amount not supported"
+            );
+        }
+
+        /* require(
             ICoinLeagueSettings(settings).isAllowedAmounts(_amount),
             "Amount not supported"
-        );
+        );*/
         require(
-            ICoinLeagueSettings(settings).isAllowedTimeFrame(_duration),
+            ICoinLeagueSettingsV2(settings).isAllowedTimeFrame(_duration),
             "Time Frame not supported"
         );
         require(
@@ -176,7 +194,6 @@ contract CoinLeagueV3Factory is Ownable {
         address[] memory coin_feeds,
         address captain_coin,
         address affiliate,
-        uint256 champion_id,
         uint256 id
     ) external payable {
         require(
@@ -190,20 +207,13 @@ contract CoinLeagueV3Factory is Ownable {
 
         require(games[id].started == false, "Game already started");
         require(games[id].aborted == false, "Game was aborted");
-        // We pass this number if we want to not use champion id
-        if (champion_id != 500000) {
-            require(
-                CHAMPIONS.ownerOf(champion_id) == msg.sender,
-                "You need to own these champions"
-            );
-        }
         require(
-            ICoinLeagueSettings(settings).isChainLinkFeed(captain_coin),
+            ICoinLeagueSettingsV2(settings).isChainLinkFeed(captain_coin),
             "Feed not supported"
         );
         for (uint256 index = 0; index < coin_feeds.length; index++) {
             require(
-                ICoinLeagueSettings(settings).isChainLinkFeed(
+                ICoinLeagueSettingsV2(settings).isChainLinkFeed(
                     coin_feeds[index]
                 ),
                 "Feed not supported"
@@ -234,14 +244,7 @@ contract CoinLeagueV3Factory is Ownable {
                 .add(msg.value);
             player_index[id][msg.sender] = players[id].length;
             players[id].push(
-                Player(
-                    coin_feeds,
-                    msg.sender,
-                    captain_coin,
-                    champion_id,
-                    0,
-                    affiliate
-                )
+                Player(coin_feeds, msg.sender, captain_coin, 0, affiliate)
             );
             emit JoinedGame(msg.sender, affiliate, id);
         } else {
@@ -249,7 +252,6 @@ contract CoinLeagueV3Factory is Ownable {
             uint256 index = player_index[id][msg.sender];
             players[id][index].captain_coin = captain_coin;
             players[id][index].coin_feeds = coin_feeds;
-            players[id][index].champion_id = champion_id;
         }
     }
 
@@ -336,27 +338,12 @@ contract CoinLeagueV3Factory is Ownable {
                     captainCoin.score > 0) ||
                 (games[id].game_type == GameType.Loser && captainCoin.score < 0)
             ) {
-                if (
-                    pl.champion_id != 500000 &&
-                    CHAMPIONS.ownerOf(pl.champion_id) == pl.player_address
-                ) {
-                    pl.score =
-                        pl.score +
-                        captainCoin.score *
-                        (ICoinLeagueSettings(settings).getHoldingMultiplier() /
-                            int256(1000)) *
-                        // rarity goes from 0 to 7
-                        (ICoinLeagueSettings(settings).getChampionsMultiplier()[
-                            CHAMPIONS.getRarityOf(pl.champion_id)
-                        ] / int256(1000));
-                } else {
-                    pl.score =
-                        pl.score +
-                        (captainCoin.score *
-                            ICoinLeagueSettings(settings)
-                                .getHoldingMultiplier()) /
-                        int256(1000);
-                }
+                pl.score =
+                    pl.score +
+                    (captainCoin.score *
+                        ICoinLeagueSettingsV2(settings)
+                            .getHoldingMultiplier()) /
+                    int256(1000);
             } else {
                 pl.score = pl.score + captainCoin.score;
             }
@@ -492,7 +479,7 @@ contract CoinLeagueV3Factory is Ownable {
         if (players[id].length > 3) {
             amountSend =
                 (amount *
-                    ICoinLeagueSettings(settings).getPrizesPlayers()[
+                    ICoinLeagueSettingsV2(settings).getPrizesPlayers()[
                         winners[id][owner].place
                     ]) /
                 100;
@@ -516,7 +503,8 @@ contract CoinLeagueV3Factory is Ownable {
         require(games[id].finished == true, "Game not finished");
         require(houseClaims[id] == false, "House Already Claimed");
         houseClaims[id] = true;
-        address house_address = ICoinLeagueSettings(settings).getHouseAddress();
+        address house_address = ICoinLeagueSettingsV2(settings)
+            .getHouseAddress();
         if (games[id].coin_to_play == NativeCoin) {
             (bool sent, ) = house_address.call{value: amountToHouse(id)}("");
             require(sent, "Failed to send Ether");
@@ -547,7 +535,7 @@ contract CoinLeagueV3Factory is Ownable {
     // decided before called
     function emergency(uint256 id) external {
         require(
-            ICoinLeagueSettings(settings).getEmergencyAddress() == msg.sender,
+            ICoinLeagueSettingsV2(settings).getEmergencyAddress() == msg.sender,
             "Only emergency address can call emergency"
         );
         games[id].aborted = true;
