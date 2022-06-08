@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-contract ThetherMumbai is ERC20, ERC20Burnable {
+contract TetherMumbai is ERC20, ERC20Burnable {
     function decimals() public pure override returns (uint8) {
         return 6;
     }

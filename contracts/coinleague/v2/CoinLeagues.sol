@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
-import "../interfaces/ICoinLeagueSettings.sol";
-import "../interfaces/IChampions.sol";
+import "../../interfaces/ICoinLeagueSettings.sol";
+import "../../interfaces/IChampions.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CoinLeaguesV2 is Ownable {
@@ -106,7 +106,10 @@ contract CoinLeaguesV2 is Ownable {
             "Amount of coins not supported"
         );
         require(_abort_timestamp > block.timestamp, "Future date is required");
-        require(_start_timestamp > block.timestamp - 10 minutes, "At least only past 10 minutes dates");
+        require(
+            _start_timestamp > block.timestamp - 10 minutes,
+            "At least only past 10 minutes dates"
+        );
         require(
             ICoinLeagueSettings(game.settings).isAllowedAmounts(_amount),
             "Amount not supported"
@@ -180,7 +183,14 @@ contract CoinLeaguesV2 is Ownable {
             msg.value
         );
         players.push(
-            Player(coin_feeds, msg.sender, captain_coin, champion_id, 0, affiliate)
+            Player(
+                coin_feeds,
+                msg.sender,
+                captain_coin,
+                champion_id,
+                0,
+                affiliate
+            )
         );
         emit JoinedGame(msg.sender, affiliate);
     }
@@ -210,9 +220,12 @@ contract CoinLeaguesV2 is Ownable {
      * When game starts we get all current prices for the coins of each player
      */
     function startGame() external onlyOwner {
-        require(block.timestamp >= game.start_timestamp, "Game can not start yet");
+        require(
+            block.timestamp >= game.start_timestamp,
+            "Game can not start yet"
+        );
         // If time passed we can start game only with 2 players
-        require(players.length > 1, "Not meet min number of players");  
+        require(players.length > 1, "Not meet min number of players");
         require(game.aborted == false, "Game was aborted");
         require(game.started == false, "Game already started");
         game.started = true;
@@ -350,9 +363,9 @@ contract CoinLeaguesV2 is Ownable {
             } else {
                 if (score < score1) {
                     if (score1 < score2) {
-                        if(score2 < score3){
+                        if (score2 < score3) {
                             score3_index = score2_index;
-                            score3 = score2; 
+                            score3 = score2;
                         }
                         score2_index = score1_index;
                         score2 = score1;
@@ -391,7 +404,11 @@ contract CoinLeaguesV2 is Ownable {
                 score: players[score3_index].score,
                 claimed: false
             });
-            emit WinnedMultiple(players[score1_index].player_address, players[score2_index].player_address, players[score3_index].player_address);
+            emit WinnedMultiple(
+                players[score1_index].player_address,
+                players[score2_index].player_address,
+                players[score3_index].player_address
+            );
         } else {
             winners[players[score1_index].player_address] = Winner({
                 place: 0,
@@ -405,10 +422,7 @@ contract CoinLeaguesV2 is Ownable {
 
     function claim(address payable owner) external {
         require(game.finished == true, "Game not finished");
-        require(
-            winners[owner].winner_address == owner,
-            "You are not a winner"
-        );
+        require(winners[owner].winner_address == owner, "You are not a winner");
         require(winners[owner].claimed == false, "You already claimed");
         winners[owner].claimed = true;
         uint256 amount = game.total_amount_collected - amountToHouse();

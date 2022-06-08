@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
-import "./interfaces/ICoinLeagueSettings.sol";
-import "./interfaces/IChampions.sol";
+import "../../interfaces/ICoinLeagueSettings.sol";
+import "../../interfaces/IChampions.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CoinLeagues is Ownable {
@@ -343,9 +343,9 @@ contract CoinLeagues is Ownable {
             } else {
                 if (score < score1) {
                     if (score1 < score2) {
-                        if(score2 < score3){
+                        if (score2 < score3) {
                             score3_index = score2_index;
-                            score3 = score2; 
+                            score3 = score2;
                         }
                         score2_index = score1_index;
                         score2 = score1;
@@ -384,7 +384,11 @@ contract CoinLeagues is Ownable {
                 score: players[score3_index].score,
                 claimed: false
             });
-            emit WinnedMultiple(players[score1_index].player_address, players[score2_index].player_address, players[score3_index].player_address);
+            emit WinnedMultiple(
+                players[score1_index].player_address,
+                players[score2_index].player_address,
+                players[score3_index].player_address
+            );
         } else {
             winners[players[score1_index].player_address] = Winner({
                 place: 0,
@@ -398,10 +402,7 @@ contract CoinLeagues is Ownable {
 
     function claim(address payable owner) external {
         require(game.finished == true, "Game not finished");
-        require(
-            winners[owner].winner_address == owner,
-            "You are not a winner"
-        );
+        require(winners[owner].winner_address == owner, "You are not a winner");
         require(winners[owner].claimed == false, "You already claimed");
         winners[owner].claimed = true;
         uint256 amount = game.total_amount_collected - amountToHouse();

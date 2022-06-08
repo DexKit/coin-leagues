@@ -15,10 +15,10 @@ async function main() {
     console.log(owner.address);
 
     const Token = await hre.ethers.getContractFactory("TetherMumbai");
-    const token = await Token.deploy('Tether', 'USDT');
+    const token = await Token.deploy('TestTether', 'tUSDT', 1000000);
 
     await token.deployed();
-    console.log("Settings deployed to:", token.address);
+    console.log("Token Tether deployed to:", token.address);
 
 }
 

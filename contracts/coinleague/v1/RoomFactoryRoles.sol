@@ -8,23 +8,25 @@ contract RoomFactoryRoles is Ownable {
     event RoomCreated(address indexed creator, address room);
     event SettingsChanged(address settingsAddress);
     CoinLeaguesFactoryRoles[] public factories;
-    mapping(address => bool ) public factoryMap;
+    mapping(address => bool) public factoryMap;
     address private _settings;
 
     constructor(address settings) {
         _settings = settings;
     }
 
-    function createRoom() public returns (CoinLeaguesFactoryRoles factoryAddress){
-        factoryAddress = new CoinLeaguesFactoryRoles( _settings, owner());
+    function createRoom()
+        public
+        returns (CoinLeaguesFactoryRoles factoryAddress)
+    {
+        factoryAddress = new CoinLeaguesFactoryRoles(_settings, owner());
         factories.push(factoryAddress);
         factoryMap[address(factoryAddress)] = true;
         emit RoomCreated(msg.sender, address(factoryAddress));
     }
 
-
-    function roomExists(address room) public view returns (bool){
-         return factoryMap[room];
+    function roomExists(address room) public view returns (bool) {
+        return factoryMap[room];
     }
 
     function setSettings(address newSettings) public onlyOwner {
@@ -33,8 +35,10 @@ contract RoomFactoryRoles is Ownable {
         emit SettingsChanged(newSettings);
     }
 
-    function setSettingsOf(address newSettings, address factory) public onlyOwner {
-       CoinLeaguesFactoryRoles(factory).setSettings(newSettings);
+    function setSettingsOf(address newSettings, address factory)
+        public
+        onlyOwner
+    {
+        CoinLeaguesFactoryRoles(factory).setSettings(newSettings);
     }
-
 }

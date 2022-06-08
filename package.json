@@ -16,6 +16,7 @@
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
     "deploy-tether:mumbai": "npx hardhat run scripts/Token/deploy-tether-mumbai.ts --network mumbai",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic",
+    "deploy:v3:mumbai": "npx hardhat run scripts/Coinleague/deploy-factory-mumbai-v3.ts --network mumbai",
     "deploy:v2:polygon": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network matic",
     "deploy:v2:binance": "npx hardhat run scripts/deploy-factory-bsc-v2.ts --network bsc",
     "deploy-nft:v2:polygon": "npx hardhat run scripts/deploy-factory-nft-matic-v2.ts --network matic",
