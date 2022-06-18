@@ -237,11 +237,10 @@ contract CoinLeagueV3Factory is Ownable {
                     games[id].amount_to_play
                 );
             }
-
             amounts[id][msg.sender] = games[id].amount_to_play;
             games[id].total_amount_collected = games[id]
                 .total_amount_collected
-                .add(msg.value);
+                .add(games[id].amount_to_play);
             player_index[id][msg.sender] = players[id].length;
             players[id].push(
                 Player(coin_feeds, msg.sender, captain_coin, 0, affiliate)
