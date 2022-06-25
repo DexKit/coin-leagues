@@ -14,14 +14,14 @@ async function main() {
     const [owner] = await hre.ethers.getSigners();
     console.log(owner.address);
 
-    const Settings = await hre.ethers.getContractFactory("CoinLeagueSettingsMaticV2");
+    /*const Settings = await hre.ethers.getContractFactory("CoinLeagueSettingsMaticV2");
     const settings = await Settings.deploy();
 
     await settings.deployed();
-    console.log("Settings deployed to:", settings.address);
+    console.log("Settings deployed to:", settings.address);*/
     // We get the contract to deploy
-    const Factory = await hre.ethers.getContractFactory("CoinLeagueFactoryV3");
-    const factory = await Factory.deploy(settings.address, owner.address);
+    const Factory = await hre.ethers.getContractFactory("CoinLeagueV3Factory");
+    const factory = await Factory.deploy('0xA4b9857198b6f5aCb82d076310224E3A4BfCb1c4', owner.address);
 
     await factory.deployed();
 
