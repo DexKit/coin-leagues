@@ -12,8 +12,6 @@ contract CoinLeagueSettingsMaticV2 is ICoinLeagueSettingsV2 {
     mapping(uint256 => bool) private _allowed_amounts;
     mapping(uint256 => bool) private _allowed_amounts_stable;
     mapping(uint256 => bool) private _allowed_time_frames;
-    IERC20 internal immutable BITTOKEN =
-        IERC20(0xfd0cbdDec28a93bB86B9db4A62258F5EF25fEfdE);
     IERC20 internal immutable DEXKIT =
         IERC20(0x4D0Def42Cf57D6f27CD4983042a55dce1C9F853c);
     uint256 constant HOLDING_BITT_MULTIPLIER = 200 * 10**18;
@@ -400,10 +398,7 @@ contract CoinLeagueSettingsMaticV2 is ICoinLeagueSettingsV2 {
     }
 
     function getHoldingMultiplier() external view override returns (int256) {
-        if (
-            BITTOKEN.balanceOf(msg.sender) >= HOLDING_BITT_MULTIPLIER ||
-            DEXKIT.balanceOf(msg.sender) >= HOLDING_KIT_MULTIPLIER
-        ) {
+        if (DEXKIT.balanceOf(msg.sender) >= HOLDING_KIT_MULTIPLIER) {
             return int256(1200);
         } else {
             return int256(1200);

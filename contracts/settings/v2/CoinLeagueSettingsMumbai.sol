@@ -173,10 +173,7 @@ contract CoinLeagueSettingsMumbaiV2 is ICoinLeagueSettingsV2 {
     }
 
     function getHoldingMultiplier() external view override returns (int256) {
-        if (
-            BITTOKEN.balanceOf(msg.sender) >= HOLDING_BITT_MULTIPLIER ||
-            DEXKIT.balanceOf(msg.sender) >= HOLDING_KIT_MULTIPLIER
-        ) {
+        if (DEXKIT.balanceOf(msg.sender) >= HOLDING_KIT_MULTIPLIER) {
             return int256(1200);
         } else {
             return int256(1200);

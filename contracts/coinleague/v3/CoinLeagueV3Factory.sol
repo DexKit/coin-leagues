@@ -575,4 +575,8 @@ contract CoinLeagueV3Factory is Ownable {
     function getPlayers(uint256 id) external view returns (Player[] memory) {
         return players[id];
     }
+
+    function totalGames() external view returns (uint256) {
+        return games.length;
+    }
 }
