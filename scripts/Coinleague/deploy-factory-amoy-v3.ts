@@ -13,8 +13,9 @@ async function main() {
     // await hre.run('compile');
     const [owner] = await hre.ethers.getSigners();
     console.log(owner.address);
+    console.log('deploying settings amoy address');
 
-    const Settings = await hre.ethers.getContractFactory("CoinLeagueSettingsMaticV2");
+    const Settings = await hre.ethers.getContractFactory("CoinLeagueSettingsAmoyV2");
     const settings = await Settings.deploy();
 
     await settings.deployed();

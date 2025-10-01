@@ -69,6 +69,12 @@ export default {
         count: 100,
       },
     },
+    amoy:{
+      url: 'https://rpc-amoy.polygon.technology',
+      accounts: [PRIVATE_KEY],
+      gasPrice: 65000000000,
+    //  gasPrice:  40000000000,
+    },
 
     mumbai: {
       url: "https://matic-mumbai.chainstacklabs.com",
@@ -79,18 +85,14 @@ export default {
       accounts: [PRIVATE_KEY],
       gasPrice: 80000000000,
     },
+    base: {
+      url: `https://mainnet.base.org`,
+      accounts: [PRIVATE_KEY],
+    },
     bsc: {
       url: `https://bsc-dataseed.binance.org/`,
       accounts: [PRIVATE_KEY],
-    },
-    polygon: {
-      url: `https://polygon-rpc.com/`,
-      accounts: {
-        mnemonic: MENMONIC,
-        count: 50,
-      },
-      gasPrice: 60000000000,
-    },
+    }
   },
   gasReporter: {
     enabled: true,

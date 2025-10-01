@@ -3,9 +3,6 @@
   "version": "0.0.2",
   "main": "index.ts",
   "repository": "https://github.com/DexKit/coins-league.git",
-  "engines": {
-    "node": "16.13.1"
-  },
   "author": "JoaoCampos89 <info@dexkit.com>",
   "scripts": {
     "test": "npx hardhat  test test/squid.test.ts",
@@ -15,8 +12,11 @@
     "script:whitelist": "npx hardhat run scripts/whitelist-address.ts --network matic",
     "deploy:mumbai": "npx hardhat run scripts/deploy-factory.ts --network mumbai",
     "deploy-tether:mumbai": "npx hardhat run scripts/Token/deploy-tether-mumbai.ts --network mumbai",
+    "deploy-tether:amoy": "npx hardhat run scripts/Token/deploy-tether-amoy.ts --network amoy",
     "deploy:polygon": "npx hardhat run scripts/deploy-factory-matic.ts --network matic",
+    "deploy:v3:base": "npx hardhat run scripts/Coinleague/deploy-factory-base-v3.ts --network base",
     "deploy:v3:mumbai": "npx hardhat run scripts/Coinleague/deploy-factory-mumbai-v3.ts --network mumbai",
+    "deploy:v3:amoy": "npx hardhat run scripts/Coinleague/deploy-factory-amoy-v3.ts --network amoy",
     "deploy:v3:polygon": "npx hardhat run scripts/Coinleague/deploy-factory-matic-v3.ts --network matic",
     "deploy:v2:polygon": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network matic",
     "deploy:v2:binance": "npx hardhat run scripts/deploy-factory-bsc-v2.ts --network bsc",

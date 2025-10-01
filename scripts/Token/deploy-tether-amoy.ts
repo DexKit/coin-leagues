@@ -14,18 +14,12 @@ async function main() {
     const [owner] = await hre.ethers.getSigners();
     console.log(owner.address);
 
-    const Settings = await hre.ethers.getContractFactory("CoinLeagueSettingsMaticV2");
-    const settings = await Settings.deploy();
+    const Token = await hre.ethers.getContractFactory("TetherMumbai");
+    const token = await Token.deploy('TestTether', 'tUSDT', 1000000);
 
-    await settings.deployed();
-    console.log("Settings deployed to:", settings.address);
-    // We get the contract to deploy
-    const Factory = await hre.ethers.getContractFactory("CoinLeagueV3Factory");
-    const factory = await Factory.deploy(settings.address, owner.address);
+    await token.deployed();
+    console.log("Token Tether deployed to:", token.address);
 
-    await factory.deployed();
-
-    console.log("Factory deployed to:", factory.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

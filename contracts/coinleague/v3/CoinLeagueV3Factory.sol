@@ -38,11 +38,14 @@ contract CoinLeagueV3Factory is Ownable {
     );
     event Withdrawed(address playerAddress, uint256 timestamp, uint256 id);
 
-    event SettingsChanged(address settingsAddress);
+    event SettingsChanged(address settings_address);
+    event HouseFeeChanged(uint256 new_fee);
     address internal immutable NativeCoin =
         0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     address public settings;
+
+    uint256 public house_fee = 20;
 
     struct Player {
         // Struct
@@ -496,7 +499,7 @@ contract CoinLeagueV3Factory is Ownable {
     }
 
     /**
-     * house receives 10% of all amount
+     * house receives house fee % of all amount
      */
     function houseClaim(uint256 id) external {
         require(games[id].finished == true, "Game not finished");
@@ -541,10 +544,17 @@ contract CoinLeagueV3Factory is Ownable {
         emit AbortedGame(block.timestamp, id);
     }
 
-    function setSettings(address newSettings) public onlyOwner {
-        require(newSettings != address(0), "Settings can not be zero address");
-        settings = newSettings;
-        emit SettingsChanged(newSettings);
+    function setSettings(address new_settings) public onlyOwner {
+        require(new_settings != address(0), "Settings can not be zero address");
+        settings = new_settings;
+        emit SettingsChanged(new_settings);
+    }
+
+    function setHouseFee(uint256 new_fee) public onlyOwner {
+        require(new_fee > 0, "House fee should be bigger than zero");
+        require(new_fee < 100, "House fee should be less than 100");
+        house_fee = new_fee;
+        emit HouseFeeChanged(new_fee);
     }
 
     function getPriceFeed(address coin_feed) public view returns (int256) {
@@ -557,7 +567,7 @@ contract CoinLeagueV3Factory is Ownable {
      * View Functions
      */
     function amountToHouse(uint256 id) public view returns (uint256) {
-        return (games[id].total_amount_collected * 10) / 100;
+        return (games[id].total_amount_collected * house_fee) / 100;
     }
 
     function totalPlayers(uint256 id) public view returns (uint256) {

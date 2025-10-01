@@ -39,6 +39,10 @@ https://docs.matic.network/docs/develop/hardhat/
 
 ## Polygon Deployed Contracts
 
+- Recent 
+  Settings: 0x23C483CF1384cb872f6C443C763e479CaE0547eF
+  Factory: 0x43fB5D9d4Dcd6D71d668dc6f12fFf97F35C0Bd7E
+
 - Recent:
   Settings: 0xd3De46BEB6d0A8E80d42A317eE4943520C3edD69
   Factory: 0x8fFA73bB9404c6fa01A16e0F996787bD3F4CeF66
@@ -75,6 +79,17 @@ Factory: 0x34C21825ef6Bfbf69cb8748B4587f88342da7aFb
   0xF71a5F8DA88c8b4a322901D776D4A310F85200Bb
   0xa1B3a09D5f83a52085fd37becb229038bCeacFf3
   0x9b912c3c568EDD07068E5dd5Ad39468809D81bb5
+
+## Base Deployed Contracts
+
+Factory: 0x34C21825ef6Bfbf69cb8748B4587f88342da7aFb
+Settings: 0x9b912c3c568EDD07068E5dd5Ad39468809D81bb5
+
+
+## Amoy Deployed Contracts
+
+- Tether
+0x9b912c3c568EDD07068E5dd5Ad39468809D81bb5
 
 # NFT League
 
