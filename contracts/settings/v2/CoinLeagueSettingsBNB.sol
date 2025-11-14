@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 import "../../interfaces/ICoinLeagueSettingsV2.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // stores all settings of game
 contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
@@ -12,10 +11,6 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
     mapping(uint256 => bool) private _allowed_amounts;
     mapping(uint256 => bool) private _allowed_amounts_stable;
     mapping(uint256 => bool) private _allowed_time_frames;
-
-    IERC20 internal immutable DEXKIT =
-        IERC20(0x314593fa9a2fa16432913dBcCC96104541d32D11);
-    uint256 constant HOLDING_KIT_MULTIPLIER = 50 * 10**18;
 
     constructor() {
         // BSC Mainnet
@@ -35,26 +30,17 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // ADA/USD: 0xa767f745331D267c7751297D982b050c93985627
         _chainlink_feeds[0xa767f745331D267c7751297D982b050c93985627] = true;
 
-        // ALPACA/USD: 0xe0073b60833249ffd1bb2af809112c2fbf221DF6
-        _chainlink_feeds[0xe0073b60833249ffd1bb2af809112c2fbf221DF6] = true;
-
         // ASTER/USD: 0x3ae518be05e3F7faBf7e3Ace22Af795D7A09c2E5
         _chainlink_feeds[0x3ae518be05e3F7faBf7e3Ace22Af795D7A09c2E5] = true;
 
         // ATOM/USD: 0xb056B7C804297279A9a673289264c17E6Dc6055d
         _chainlink_feeds[0xb056B7C804297279A9a673289264c17E6Dc6055d] = true;
 
-        // AUTO/USD: 0x88E71E6520E5aC75f5338F5F0c9DeD9d4f692cDA
-        _chainlink_feeds[0x88E71E6520E5aC75f5338F5F0c9DeD9d4f692cDA] = true;
-
         // AVAX/USD: 0x5974855ce31EE8E1fff2e76591CbF83D7110F151
         _chainlink_feeds[0x5974855ce31EE8E1fff2e76591CbF83D7110F151] = true;
 
         // AXS/USD: 0x7B49524ee5740c99435f52d731dFC94082fE61Ab
         _chainlink_feeds[0x7B49524ee5740c99435f52d731dFC94082fE61Ab] = true;
-
-        // BAC/USD: 0x368b7ab0a0Ff94E23fF5e4A7F04327dF7079E174
-        _chainlink_feeds[0x368b7ab0a0Ff94E23fF5e4A7F04327dF7079E174] = true;
 
         // BAND/BNB: 0x3334bF7ec892Ca03D1378B51769b7782EAF318C4
         _chainlink_feeds[0x3334bF7ec892Ca03D1378B51769b7782EAF318C4] = true;
@@ -68,14 +54,14 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // BCH/USD: 0x43d80f616DAf0b0B42a928EeD32147dC59027D41
         _chainlink_feeds[0x43d80f616DAf0b0B42a928EeD32147dC59027D41] = true;
 
-        // BIFI/USD: 0xaB827b69daCd586A37E80A7d552a4395d576e645
-        _chainlink_feeds[0xaB827b69daCd586A37E80A7d552a4395d576e645] = true;
-
         // BNB/USD: 0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE
         _chainlink_feeds[0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE] = true;
 
         // BR/USD: 0x90d36D4909730c390546ac288c5C7bEc3f62FF4D
         _chainlink_feeds[0x90d36D4909730c390546ac288c5C7bEc3f62FF4D] = true;
+
+        // BSW/USD: 0x08E70777b982a58D23D05E3D7714f44837c06A21
+        _chainlink_feeds[0x08E70777b982a58D23D05E3D7714f44837c06A21] = true;
 
         // BTC/BNB: 0x116EeB23384451C78ed366D4f67D5AD44eE771A0
         _chainlink_feeds[0x116EeB23384451C78ed366D4f67D5AD44eE771A0] = true;
@@ -110,9 +96,6 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // COMP/USD: 0x0Db8945f9aEf5651fa5bd52314C5aAe78DfDe540
         _chainlink_feeds[0x0Db8945f9aEf5651fa5bd52314C5aAe78DfDe540] = true;
 
-        // CREAM/USD: 0xa12Fc27A873cf114e6D8bBAf8BD9b8AC56110b39
-        _chainlink_feeds[0xa12Fc27A873cf114e6D8bBAf8BD9b8AC56110b39] = true;
-
         // CRV/USD: 0x2e1C3b6Fcae47b20Dd343D9354F7B1140a1E6B27
         _chainlink_feeds[0x2e1C3b6Fcae47b20Dd343D9354F7B1140a1E6B27] = true;
 
@@ -121,12 +104,6 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
 
         // DAI/USD: 0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA
         _chainlink_feeds[0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA] = true;
-
-        // DEGO/USD: 0x39F1275366D130eB677D4F47D40F9296B62D877A
-        _chainlink_feeds[0x39F1275366D130eB677D4F47D40F9296B62D877A] = true;
-
-        // DF/USD: 0x1b816F5E122eFa230300126F97C018716c4e47F5
-        _chainlink_feeds[0x1b816F5E122eFa230300126F97C018716c4e47F5] = true;
 
         // DODO/USD: 0x87701B15C08687341c2a847ca44eCfBc8d7873E1
         _chainlink_feeds[0x87701B15C08687341c2a847ca44eCfBc8d7873E1] = true;
@@ -140,12 +117,6 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // DOT/USD: 0xC333eb0086309a16aa7c8308DfD32c8BBA0a2592
         _chainlink_feeds[0xC333eb0086309a16aa7c8308DfD32c8BBA0a2592] = true;
 
-        // DPI/USD: 0x7ee7E7847FFC93F8Cf67BCCc0002afF9C52DE524
-        _chainlink_feeds[0x7ee7E7847FFC93F8Cf67BCCc0002afF9C52DE524] = true;
-
-        // EOS/USD: 0xd5508c8Ffdb8F15cE336e629fD4ca9AdB48f50F0
-        _chainlink_feeds[0xd5508c8Ffdb8F15cE336e629fD4ca9AdB48f50F0] = true;
-
         // ETH/BNB: 0x63D407F32Aa72E63C7209ce1c2F5dA40b3AaE726
         _chainlink_feeds[0x63D407F32Aa72E63C7209ce1c2F5dA40b3AaE726] = true;
 
@@ -154,9 +125,6 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
 
         // ezETH/ETH Exchange Rate: 0x06F34EdD61Be3b2Ff3F630B500dF81eeA8312350
         _chainlink_feeds[0x06F34EdD61Be3b2Ff3F630B500dF81eeA8312350] = true;
-
-        // FB/USD: 0xfc76E9445952A3C31369dFd26edfdfb9713DF5Bb
-        _chainlink_feeds[0xfc76E9445952A3C31369dFd26edfdfb9713DF5Bb] = true;
 
         // FDUSD/USD: 0x390180e80058A8499930F0c13963AD3E0d86Bfc9
         _chainlink_feeds[0x390180e80058A8499930F0c13963AD3E0d86Bfc9] = true;
@@ -194,17 +162,11 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // LBTC/BTC: 0x41A292Dced910690b86b99A6cbC2e181dc56De57
         _chainlink_feeds[0x41A292Dced910690b86b99A6cbC2e181dc56De57] = true;
 
-        // LINA/USD: 0x38393201952f2764E04B290af9df427217D56B41
-        _chainlink_feeds[0x38393201952f2764E04B290af9df427217D56B41] = true;
-
         // LINK/BNB: 0xB38722F6A608646a538E882Ee9972D15c86Fc597
         _chainlink_feeds[0xB38722F6A608646a538E882Ee9972D15c86Fc597] = true;
 
         // LINK/USD: 0xca236E327F629f9Fc2c30A4E95775EbF0B89fac8
         _chainlink_feeds[0xca236E327F629f9Fc2c30A4E95775EbF0B89fac8] = true;
-
-        // LIT/USD: 0x83766bA8d964fEAeD3819b145a69c947Df9Cb035
-        _chainlink_feeds[0x83766bA8d964fEAeD3819b145a69c947Df9Cb035] = true;
 
         // LISTA/USD: 0x801A72542E6F2c1A022eC6865600D6872b191308
         _chainlink_feeds[0x801A72542E6F2c1A022eC6865600D6872b191308] = true;
@@ -221,26 +183,11 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // MATIC/USD: 0x7CA57b0cA6367191c94C8914d7Df09A57655905f
         _chainlink_feeds[0x7CA57b0cA6367191c94C8914d7Df09A57655905f] = true;
 
-        // MIM/USD: 0xc9D267542B23B41fB93397a93e5a1D7B80Ea5A01
-        _chainlink_feeds[0xc9D267542B23B41fB93397a93e5a1D7B80Ea5A01] = true;
-
-        // MIR/USD: 0x291B2983b995870779C36A102Da101f8765244D6
-        _chainlink_feeds[0x291B2983b995870779C36A102Da101f8765244D6] = true;
-
-        // MRNA/USD: 0x6101F4DFBb24Cac3D64e28A815255B428b93639f
-        _chainlink_feeds[0x6101F4DFBb24Cac3D64e28A815255B428b93639f] = true;
-
         // MUSD/USD: 0xE9736eB458b0741e781E460228b9e5291488F7cE
         _chainlink_feeds[0xE9736eB458b0741e781E460228b9e5291488F7cE] = true;
 
         // NEAR/USD: 0x0Fe4D87883005fCAFaF56B81d09473D9A29dCDC3
         _chainlink_feeds[0x0Fe4D87883005fCAFaF56B81d09473D9A29dCDC3] = true;
-
-        // NFLX/USD: 0x1fE6c9Bd9B29e5810c2819f37dDa8559739ebeC9
-        _chainlink_feeds[0x1fE6c9Bd9B29e5810c2819f37dDa8559739ebeC9] = true;
-
-        // NULS/USD: 0xaCFBE73231d312AC6954496b3f786E892bF0f7e5
-        _chainlink_feeds[0xaCFBE73231d312AC6954496b3f786E892bF0f7e5] = true;
 
         // ONG/USD: 0xcF95796f3016801A1dA5C518Fc7A59C51dcEf793
         _chainlink_feeds[0xcF95796f3016801A1dA5C518Fc7A59C51dcEf793] = true;
@@ -251,20 +198,11 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // PAXG/USD: 0x7F8caD4690A38aC28BDA3D132eF83DB1C17557Df
         _chainlink_feeds[0x7F8caD4690A38aC28BDA3D132eF83DB1C17557Df] = true;
 
-        // PFE/USD: 0xe96fFdE2ba50E0e869520475ee1bC73cA2dEE326
-        _chainlink_feeds[0xe96fFdE2ba50E0e869520475ee1bC73cA2dEE326] = true;
-
         // POL/USD: 0x081195B56674bb87b2B92F6D58F7c5f449aCE19d
         _chainlink_feeds[0x081195B56674bb87b2B92F6D58F7c5f449aCE19d] = true;
 
-        // RAMP/USD: 0xD1225da5FC21d17CaE526ee4b6464787c6A71b4C
-        _chainlink_feeds[0xD1225da5FC21d17CaE526ee4b6464787c6A71b4C] = true;
-
         // RDNT/USD: 0x20123C6ebd45c6496102BeEA86e1a6616Ca547c6
         _chainlink_feeds[0x20123C6ebd45c6496102BeEA86e1a6616Ca547c6] = true;
-
-        // REEF/USD: 0x46f13472A4d4FeC9E07E8A00eE52f4Fa77810736
-        _chainlink_feeds[0x46f13472A4d4FeC9E07E8A00eE52f4Fa77810736] = true;
 
         // savBTC/avBTC Exchange Rate: 0x14Ae6B76cd940Fa449381cdC9f3a098A3D39A730
         _chainlink_feeds[0x14Ae6B76cd940Fa449381cdC9f3a098A3D39A730] = true;
@@ -284,14 +222,8 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // SolvBTC.BBN/SolvBTC Exchange Rate: 0x601CaA447C59Dc4E25992f4057BbE828F66193C0
         _chainlink_feeds[0x601CaA447C59Dc4E25992f4057BbE828F66193C0] = true;
 
-        // SPCE/USD: 0xC861a351b2b50985b9061a5b68EBF9018e7FfB7b
-        _chainlink_feeds[0xC861a351b2b50985b9061a5b68EBF9018e7FfB7b] = true;
-
         // SPELL/USD: 0x47e01580C537Cd47dA339eA3a4aFb5998CCf037C
         _chainlink_feeds[0x47e01580C537Cd47dA339eA3a4aFb5998CCf037C] = true;
-
-        // SPY/USD: 0xb24D1DeE5F9a3f761D286B56d2bC44CE1D02DF7e
-        _chainlink_feeds[0xb24D1DeE5F9a3f761D286B56d2bC44CE1D02DF7e] = true;
 
         // STONE/ETH Exchange Rate: 0xC6A1314E89d01517a90AE4b0d9d5e499A324B283
         _chainlink_feeds[0xC6A1314E89d01517a90AE4b0d9d5e499A324B283] = true;
@@ -314,17 +246,11 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // TRX/USD: 0xF4C5e535756D11994fCBB12Ba8adD0192D9b88be
         _chainlink_feeds[0xF4C5e535756D11994fCBB12Ba8adD0192D9b88be] = true;
 
-        // TSM/USD: 0x685fC5acB74CE3d5DF03543c9813C73DFCe50de8
-        _chainlink_feeds[0x685fC5acB74CE3d5DF03543c9813C73DFCe50de8] = true;
-
         // TUSD/USD: 0xa3334A9762090E827413A7495AfeCE76F41dFc06
         _chainlink_feeds[0xa3334A9762090E827413A7495AfeCE76F41dFc06] = true;
 
         // TWT/BNB: 0x7E728dFA6bCa9023d9aBeE759fDF56BEAb8aC7aD
         _chainlink_feeds[0x7E728dFA6bCa9023d9aBeE759fDF56BEAb8aC7aD] = true;
-
-        // UNH/USD: 0xC18c5A32c84CbbAc7D0F06Dd370198DA711c73C9
-        _chainlink_feeds[0xC18c5A32c84CbbAc7D0F06Dd370198DA711c73C9] = true;
 
         // UNI/BNB: 0x25298F020c3CA1392da76Eb7Ac844813b218ccf7
         _chainlink_feeds[0x25298F020c3CA1392da76Eb7Ac844813b218ccf7] = true;
@@ -359,23 +285,14 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // USR/USD: 0xE8ed18E29402CD223bC5B73D30e40CCdf7b72986
         _chainlink_feeds[0xE8ed18E29402CD223bC5B73D30e40CCdf7b72986] = true;
 
-        // VAI/USD: 0x058316f8Bb13aCD442ee7A216C7b60CFB4Ea1B53
-        _chainlink_feeds[0x058316f8Bb13aCD442ee7A216C7b60CFB4Ea1B53] = true;
-
         // VET/USD: 0x9f1fD2cEf7b226D555A747DA0411F93c5fe74e13
         _chainlink_feeds[0x9f1fD2cEf7b226D555A747DA0411F93c5fe74e13] = true;
-
-        // VT/USD: 0xa3D5BB7e8ccc2Dc7492537cc2Ec4e4E7BBA32fa0
-        _chainlink_feeds[0xa3D5BB7e8ccc2Dc7492537cc2Ec4e4E7BBA32fa0] = true;
 
         // weETH/eETH Exchange Rate: 0xF37Be32598E9851f785acA86c2162e7C1A8466dd
         _chainlink_feeds[0xF37Be32598E9851f785acA86c2162e7C1A8466dd] = true;
 
         // WIN/USD: 0x9e7377E194E41d63795907c92c3EB351a2eb0233
         _chainlink_feeds[0x9e7377E194E41d63795907c92c3EB351a2eb0233] = true;
-
-        // WING/USD: 0xf7E7c0ffCB11dAC6eCA1434C67faB9aE000e10a7
-        _chainlink_feeds[0xf7E7c0ffCB11dAC6eCA1434C67faB9aE000e10a7] = true;
 
         // WLFI/USD: 0xD3F669EF5C364C14d353F46b1D1a048A846e00f1
         _chainlink_feeds[0xD3F669EF5C364C14d353F46b1D1a048A846e00f1] = true;
@@ -394,15 +311,6 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
 
         // WSTUSR-STUSR Exchange Rate: 0xA40a0dC23D3A821fF5Ea9E23080B74DAC031158d
         _chainlink_feeds[0xA40a0dC23D3A821fF5Ea9E23080B74DAC031158d] = true;
-
-        // WTI/USD: 0xb1BED6C1fC1adE2A975F54F24851c7F410e27718
-        _chainlink_feeds[0xb1BED6C1fC1adE2A975F54F24851c7F410e27718] = true;
-
-        // XAG/USD: 0x817326922c909b16944817c207562B25C4dF16aD
-        _chainlink_feeds[0x817326922c909b16944817c207562B25C4dF16aD] = true;
-
-        // XAU/USD: 0x86896fEB19D8A607c3b11f2aF50A0f239Bd71CD0
-        _chainlink_feeds[0x86896fEB19D8A607c3b11f2aF50A0f239Bd71CD0] = true;
 
         // XLM/USD: 0x27Cc356A5891A3Fe6f84D0457dE4d108C6078888
         _chainlink_feeds[0x27Cc356A5891A3Fe6f84D0457dE4d108C6078888] = true;
@@ -437,9 +345,6 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // YFI/USD: 0xD7eAa5Bf3013A96e3d515c055Dbd98DbdC8c620D
         _chainlink_feeds[0xD7eAa5Bf3013A96e3d515c055Dbd98DbdC8c620D] = true;
 
-        // YFII/USD: 0xC94580FAaF145B2FD0ab5215031833c98D3B77E4
-        _chainlink_feeds[0xC94580FAaF145B2FD0ab5215031833c98D3B77E4] = true;
-
         // YUSD-USD Exchange Rate: 0x83B8DF906c631dD7460Ac875Dc02A62db1dcD37A
         _chainlink_feeds[0x83B8DF906c631dD7460Ac875Dc02A62db1dcD37A] = true;
 
@@ -449,12 +354,10 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
         // ZIL/USD: 0x3e3aA4FC329529C8Ab921c810850626021dbA7e6
         _chainlink_feeds[0x3e3aA4FC329529C8Ab921c810850626021dbA7e6] = true;
 
-        // BSW/USD: 0x08E70777b982a58D23D05E3D7714f44837c06A21
-        _chainlink_feeds[0x08E70777b982a58D23D05E3D7714f44837c06A21] = true;
-
         // SUSD1+-USD1 Exchange Rate: 0x08CA3ac4dE41F2791e8A247859d637a8977473D7
         _chainlink_feeds[0x08CA3ac4dE41F2791e8A247859d637a8977473D7] = true;
-         // Allowed Amounts
+
+        // Allowed Amounts
         _allowed_amounts[0.0001 ether] = true;
         _allowed_amounts[0.01 ether] = true;
         _allowed_amounts[0.05 ether] = true;
@@ -593,11 +496,7 @@ contract CoinLeagueSettingsV2BNB is ICoinLeagueSettingsV2 {
     }
 
     function getHoldingMultiplier() external view override returns (int256) {
-        if (DEXKIT.balanceOf(msg.sender) >= HOLDING_KIT_MULTIPLIER) {
-            return int256(1200);
-        } else {
-            return int256(1200);
-        }
+        return int256(1200);
     }
 
     function getChampionsMultiplier()
