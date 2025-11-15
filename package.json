@@ -18,6 +18,7 @@
     "deploy:v3:mumbai": "npx hardhat run scripts/Coinleague/deploy-factory-mumbai-v3.ts --network mumbai",
     "deploy:v3:amoy": "npx hardhat run scripts/Coinleague/deploy-factory-amoy-v3.ts --network amoy",
     "deploy:v3:polygon": "npx hardhat run scripts/Coinleague/deploy-factory-matic-v3.ts --network matic",
+    "deploy:v3:bsc": "npx hardhat run scripts/Coinleague/deploy-factory-bsc-v3.ts --network bsc",
     "deploy:v2:polygon": "npx hardhat run scripts/deploy-factory-matic-v2.ts --network matic",
     "deploy:v2:binance": "npx hardhat run scripts/deploy-factory-bsc-v2.ts --network bsc",
     "deploy-nft:v2:polygon": "npx hardhat run scripts/deploy-factory-nft-matic-v2.ts --network matic",

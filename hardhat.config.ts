@@ -90,8 +90,9 @@ export default {
       accounts: [PRIVATE_KEY],
     },
     bsc: {
-      url: `https://bsc-dataseed.binance.org/`,
+      url: `https://bsc.blockrazor.xyz`,
       accounts: [PRIVATE_KEY],
+      gasPrice: 800000000,
     }
   },
   gasReporter: {
